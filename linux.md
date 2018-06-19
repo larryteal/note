@@ -92,3 +92,28 @@
   * 工具中包括 ifconfig、netstat 等
   * ifconfig
   * netstat
+
+## 命令历史
+  * 输入 history 命令，可以查看历史命令，历史命令存储在一个 ~/.bash_history文件中
+  * 只有正常退出当前shell后用户再当前shell中执行的命令才会写入到~/.bash_history文件中（这也是history命令和~/.bash_history文件有时不一致的原因）
+  * !! 执行上一条命令
+  * !n 执行第n条命令
+## 别名 alias
+  * 使用alias为一个很长的命令起一个短的别名
+  ```bash
+  alias la='ls -al'
+  ```
+  * alias别名设置是临时的，退出shell后别名失效
+  * 可以别名设置写到 ～/.bashrc  或 ～/.bash_profile 文件中 (source)
+
+## shell 与 子 shell
+  * 在无图形界面的系统中，我们登陆主机后就已经处于一个shell中了，这个shell就是将来要执行的脚本的父shell。
+  * 再有图形界面的窗口，开启一个 terminal 就是开启了一个shell，他是在其中执行脚本的父shell。
+  * 当执行一个脚本时，父shell会根据脚本程序的的第一行#! 之后指定的shell程序来开启一个子shell环境，然后在子shell中执行这个脚本程序，执行完毕子shell结束，回到父shell，不影响父shell的环境。
+  * 执行脚本的方式有三种
+    * 1、source filename 或者  .    filename 
+    * 2、sh filename 或者 bash filename
+    * 3、./filename
+  * 三种执行方式的差别：
+      * 用 sh filename 、bash filename、./filename 的方式执行脚本时会新建一个子shell，在子shell中执行脚本内容。在子shell中新建或修改的变量不会被带回父shell中。
+      * 用 source filename 、 .    filename 的方式执行脚本时不会新开子shell，而是先读取脚本内容然后在当前shell中执行
