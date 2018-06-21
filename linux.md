@@ -117,3 +117,23 @@
   * 三种执行方式的差别：
       * 用 sh filename 、bash filename、./filename 的方式执行脚本时会新建一个子shell，在子shell中执行脚本内容。在子shell中新建或修改的变量不会被带回父shell中。
       * 用 source filename 、 .    filename 的方式执行脚本时不会新开子shell，而是先读取脚本内容然后在当前shell中执行
+
+## 切换到不同的终端 Ctrl+Alt+F1~F7
+  * Ctrl+Alt+F1 是图形界面（Centos 7）
+  * Ctrl+Alt+F2~F6 是Shell 终端
+  * Ctrl+Alt+F7 （没有成功启动终端）
+
+## which 和 type （ 可选 -a 参数，显示更多信息 ）
+  * which 显示命令位置
+  ```bash
+  which ps
+  which pwd
+  which -a pwd
+  ```    
+  * type 显示命令位置以及shell内建命令信息
+  ```bash
+  type -a pwd
+  ```
+
+## 小知识
+  * tty 代表电传打字机(teletypewriter)。这是一个古老的名词,指的是一台用于发送消息的机器。  

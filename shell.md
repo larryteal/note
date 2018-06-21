@@ -587,3 +587,15 @@
 ## 文件导入
   * .   path
   * source path  
+## 输入密码时关闭回显
+  ```bash
+  printf "Enter new password: "
+  stty -echo  # 关闭
+  read pass < /dev/tty
+  printf "\nEnter again: "
+  read pass2 < /dev/tty
+  stty echo  # 打开
+  printf "\n"
+  echo $pass
+  echo $pass2
+  ```  
