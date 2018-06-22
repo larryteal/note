@@ -708,3 +708,651 @@
   chmod g+s testdir
   ```
   * 首先,用 mkdir 命令来创建希望共享的目录。然后通过 chgrp 命令将目录的默认属组改为包含所有需要共享文件的用户的组(你必须是该组的成员)。最后,将目录的SGID位置位,以保证目录中新建文件都用shared作为默认属组。
+
+## 软件管理
+  * yum install package_name , 安装包
+  * yum localinstall  package_name.rpm , 本地安装
+    * yum install package_name.rpm ，也可以安装本地包
+  * yum list installed  ， 列出已安装的包
+  * yum list gcc , 查看某个包是否已经安装
+  * yum provides  file_name 查找某个特定文件属于那个软件包
+    ```bash
+    yum provides  /etc/yum.conf
+    ```
+  * yum list updates ，列出已安装软件包的可用更新  
+  * yum update package_name, 更新指定软件
+  * yum update ， 更新所有软件
+  * yum remove  package_name, 删除指定软件（删除软件和相关文件）
+    * yum erase package_name, 删除指定软件（删除软件和相关文件）
+  * yum clean all  ,处理损坏的包依赖关系。有时在安装多个软件包时,某个包的软件依赖关系可能会被另一个包的安装覆盖掉。这叫作损坏的包依赖关系(broken dependency),然后试着用 yum 命令的 update 选项。有时,只要清理了放错位置的文件就可以了。
+  * yum deplist package_name ，这个命令显示了所有包的库依赖关系以及什么软件可以提供这些库依赖关系。
+    * yum update --skip-broken ，--skip-broken 选项允许你忽略依赖关系损坏的那个包,继续去更新其他软件包。这可能救不了损坏的包,但至少可以更新系统上的其他包。
+  * yum repolist ，列出你现在正从哪些仓库中获取软件
+
+## 编辑器
+### vim
+  * vim 编辑器有两种模式
+    * 普通模式 （ 刚打开时 ）
+    * 插入模式  （ 普通模式按i键切换到插入模式，插入模式按Esc键切换到普通模式 ）
+  * 普通模式下可以使用方向键控制光标移动，也可以使用hjkl键移动（没有方向键的情况）。
+  * 普通模式快速定位
+    * PageDown 、PageUp ，上下翻页
+    * G ， 移动到缓冲区的最后一行
+    * num G，移动到缓冲区的第 num 行。
+    * gg ，移动到缓冲区的第一行
+  * 普通模式下有一个特别的功能叫做命令行模式。
+    * 在普通模式下按下冒号（：）键，出现命令行模式。
+    * q ，  如果未修改缓冲区数据,退出。
+    * q! ，取消所有对缓冲区数据的修改并退出。
+    * w filename ，将文件保存到另一个文件中。
+    * wq :将缓冲区数据保存到文件中并退出。
+  * 普通模式下的一些命令  
+    * 删除当前光标所在位置的字符
+    * dd 删除当前光标所在行
+    * dw 删除当前光标所在位置的单词
+    * d$ 删除当前光标所在位置至行尾的内容
+    * J 删除当前光标所在行行尾的换行符(拼接行)
+    * u 撤销前一编辑命令
+    * a 在当前光标后追加数据
+    * A 在当前光标所在行行尾追加数据
+    * r char 用 char 替换当前光标所在位置的单个字符
+    * R text 用 text 覆盖当前光标所在位置的数据,直到按下ESC键  
+    * 有些编辑命令允许使用数字修饰符来指定重复该命令多少次。比如,命令 2x 会删除从光标当前位置开始的两个字符,命令 5dd 会删除从光标当前所在行开始的5行。
+    * 在vim编辑器的普通模式下使用退格键(Backspace键)和删除键(Delete键)时要留心。vim编辑器通常会将删除键识别成 x 命令的功能,删除当前光标所在位置的字符，vim编辑器在普通模式下通常不识别退格键。
+  * 复制和粘贴
+    * 粘贴的命令是 p，他可以和任何删除命令结合使用，删除命令会把删除的内容放到单独的存储器中。
+    * 复制文本命令是 y (yank)，可以在y后面使用和d命令相同的第二个字符，例如dw表示删除一个单词，yw表示复制一个单词。
+      * yw表示复制一个单词。
+      * y$ 表示复制到行尾。
+    * 选择复制
+      * 先按下v键，这是移动光标高亮显示选中的文本
+      * 然后按y键，复制选中的内容，p键粘贴内容。  
+  * 查找和替换
+    * 查找，第一步 按 / 键 ，或者在命令行模式输入 / ，第二步在 / 后面输入查找的内容。
+    * 查找有三种回应方式。
+      * 1、如果要查找的文本出现在光标当前位置之后,则光标会跳到该文本出现的第一个位置。
+      * 2、如果要查找的文本未在光标当前位置之后出现,则光标会绕过文件末尾,出现在该文本所在的第一个位置(并用一条消息指明)
+      * 3、输出一条错误消息,说明在文件中没有找到要查找的文本。
+      * 查找是从查找时光标当前的位置后面开始的，如果光标前面后面都有要查找的内容，则查出的内容是当时光标后面的内容。
+      * 多个内容时，定位到下一个
+        * 方法一，在次按/键然后按Enter键（不用输入内容）
+        * 方法二，按n键（next）。
+    * 替换，替换要在命令行模式下进行。命令格式如下：
+      * :s/old/new/  ：替换当前行的一个old。
+      * :s/old/new/g :替换当前行的所有 old 。
+      * :n,ms/old/new/g :替换行号 n 和 m 之间所有 old 。
+      * :%s/old/new/g :替换整个文件中的所有 old 。
+      * %s/old/new/gc :替换整个文件中的所有 old ,但在每次出现时提示。
+## Shell 编程
+
+### 使用多个命令
+  * shell可以让你将多个命令串起来,一次执行完成。如果要两个命令一起运行,可以把它们放在同一行中,彼此间用分号隔开。（每一行的内容不要太多）
+### 创建shell脚本文件
+  * 在创建shell脚本文件时,必须在文件的第一行指定要使用的shell。其格式为:
+    ```text
+    #!/bin/bash
+    ```
+  * 在shell脚本中 # 表示注释  
+  * 如果在一行写两个或多个命令时要使用分号隔开。
+    ```bash
+    #!/bin/bash
+    who
+    pwd
+    date ; ls
+    ```
+  * shell 脚本中的命令按顺序执行。
+  * 执行脚本
+    ```bash
+    chmod u+x  test.sh
+    ./test.sh
+    ```
+  * echo 输出
+    ```bash
+    echo This is test 
+    echo "This is a test"
+    echo 'This is a test'
+    echo "This is a 'test'" 
+    echo 'This is a "test"'
+    echo -n "This is a test" # 不换行
+    echo "The cost of the item is \$15"
+    ```  
+  * 用户变量
+    * 字母、数字、下划线组成。
+    * 系统环境变量一般是全大写，自定义变量尽量不要全大写。
+    * 变量区分大小写
+    * 变量不能数字开头
+    * 变量、等号、值三者之间不能有空格。
+      ```bash
+      n1=100
+      n2=$n1
+      ```
+    * 变量值有多个参此  
+    * 变量值有多个单词组成时要用引号（单引号或双引号）引起来
+      * 单因号的值会原样输出，无法引用变量
+      * 双引号内可以使用变量
+        ```bash
+        name=Larry
+        greeting="Hello $name"
+        greeting="Hello ${name}"
+        PATH="$PATH:/aa/bb"
+        ```
+    * 使用变量要用$符
+      * $var_name
+      * ${var_name} ，不能有空格    
+###  命令替换
+  * shell脚本中最有用的特性之一就是可以从命令输出中提取信息,并将其赋给变量 
+    * 方法一、使用反引号 ``
+      ```bash
+      dt=`date`
+      echo $dt
+      ```
+    * 方法二、使用$小括号 $()
+      ```bash
+      dt=$(date)
+      echo $dt
+      ```
+  * 一个例子
+    ```bash
+    #!/bin/bash
+    # copy the /usr/bin directory listing to a log file
+    today=$(date +%y%m%d)
+    ls /usr/bin -al > log.$today
+    ```
+  * 命令替换会创建一个子shell来运行对应的命令。
+
+### 输入输出重定向
+  * > ，输出重定向（覆盖）
+  * >> ，输出重定向（追加）
+  * <  ，输入重定向
+  * << ，内联输入重定向
+    * 在命令行上使用内联输入重定向时,shell会用 PS2 环境变量中定义的次提示符（>）
+    ```bash
+    wc << EOF
+    > test string 1
+    > test string 2
+    > test string 3
+    EOF
+    ```  
+### 管道
+  * 管道符 |
+  * 上一个命令执行的结果作为输入传递给下一个命令
+    ```bash
+    ls -l | sort | more
+    ```  
+  * 管道搭配重定向
+    ```bash
+    rpm -qa | sort > rpm.list
+    ```    
+  * 到目前为止,管道最流行的用法之一是将命令产生的大量输出通过管道传送给 more 命令。这对 ls 命令来说尤为常见  
+
+###  在shell中执行数学运算
+  * bash shell数学运算符只支持整数运算,若结果是小数则取整。（z shell(zsh)提供了完整的浮点数算术操作,也可以使用bc程序）
+  * 在bash中执行数学运算比较麻烦，但是有两种方式
+    * 通过 expr 命令 
+      ```bash
+      res=`expr 1 + 1`  # + (运算符) 两边要有空格
+      ```
+       ```bash
+      res=$( expr 8 / 2 )
+      ```
+      ```bash
+      res=`expr 2 \* 3`  # 乘法运算要转义
+      ```
+    * 使用 $[  ] 的方式，[]内是数学表达式，
+      ```bash
+      res=$[1+1]  # [] 内以及运算符两边不是必须有空格
+      ```
+      ```bash
+      n1=100
+      n2=50
+      n3=45
+      res=$[ $n1 * ( $n2 - $n3 ) ]
+      ```
+  * expr 命令的方式是为了兼容 Bourne  shell，支持少数的数学运算和字符串操作
+    * ARG1 | ARG2 如果 ARG1 既不是null也不是零值,返回 ARG1 ;否则返回 ARG2
+    * ARG1 & ARG2 如果没有参数是null或零值,返回 ARG1 ;否则返回 0
+    * ARG1 < ARG2 如果 ARG1 小于 ARG2 ,返回 1 ;否则返回 0
+    * ARG1 <= ARG2 如果 ARG1 小于或等于 ARG2 ,返回 1 ;否则返回 0
+    * ARG1 = ARG2 如果 ARG1 等于 ARG2 ,返回 1 ;否则返回 0
+    * ARG1 != ARG2 如果 ARG1 不等于 ARG2 ,返回 1 ;否则返回 0
+    * ARG1 >= ARG2 如果 ARG1 大于或等于 ARG2 ,返回 1 ;否则返回 0
+    * ARG1 > ARG2 如果 ARG1 大于 ARG2 ,返回 1 ;否则返回 0
+    * ARG1 + ARG2 返回 ARG1 和 ARG2 的算术运算和
+    * ARG1 - ARG2 返回 ARG1 和 ARG2 的算术运算差
+    * ARG1 * ARG2 返回 ARG1 和 ARG2 的算术乘积
+    * ARG1 / ARG2 返回 ARG1 被 ARG2 除的算术商
+    * ARG1 % ARG2 返回 ARG1 被 ARG2 除的算术余数
+    * STRING : REGEXP 如果 REGEXP 匹配到了 STRING 中的某个模式,返回该模式匹配
+    * match STRING REGEXP 如果 REGEXP 匹配到了 STRING 中的某个模式,返回该模式匹配
+    * substr STRING POS LENGTH 返回起始位置为 POS (从 1 开始计数)、长度为 LENGTH 个字符的子字符串
+    * index STRING CHARS 返回在 STRING 中找到 CHARS 字符串的位置;否则,返回 0
+    * length STRING 返回字符串 STRING 的数值长度
+    * + TOKEN 将 TOKEN 解释成字符串,即使是个关键字
+    * (EXPRESSION) 返回 EXPRESSION 的值
+  * 使用bc进行浮点运算
+    * 安装bc
+      ```bash
+      sudo yum install bc -y
+      ```
+    * bash计算器实际上是一种编程语言,它允许在命令行中输入浮点表达式,然后解释并计算该表达式,最后返回结果。bash计算器能够识别:  
+      * 数字(整数和浮点数)
+      * 变量(简单变量和数组)
+      * 注释(以#或C语言中的 /* */ 开始的行)
+      * 表达式
+      * 编程语句(例如 if-then 语句)
+      * 函数
+    * shell 中直接输入bc 就能使用bc计算器了  
+      * 输入 quit 退出。
+      * 浮点运算是由内建变量 scale 控制的，默认值为0，若要保留4位小数输入 scale=4
+      * 启动 bc 是可以使用 -q 参数，表示不显示欢迎信息。
+    * 在shell脚本中使用bc
+      * 语法（使用的是命令替换）
+        * variable=$(echo "options; expression" | bc)
+        * 第一部分 options 允许你设置变量。如果你需要不止一个变量,可以用分号将其分开。
+        * expression 参数定义了通过 bc 执行的数学表达式。
+    * 例子    
+      ```text
+      #!/bin/bash
+      var1=$(echo "scale=4; 3.44 / 5" | bc)
+      echo The answer is $var1
+      ```
+      ```text
+      #!/bin/bash
+      var1=10.46
+      var2=43.67
+      var3=33.2
+      var4=71
+      var5=$(bc << EOF
+      scale = 4
+      a1 = ( $var1 * $var2)
+      b1 = ($var3 * $var4)
+      a1 + b1
+      EOF
+      )
+      echo The final answer for this mess is $var5
+      ```
+      ```text
+      # 内联重定向说明
+      variable=$(bc << EOF
+      options
+      statements
+      expressions
+      EOF
+      )
+      ```
+### 退出脚本
+  * 没有指定退出时，运行完最后一条命令时,脚本就结束了。其实还有另外一种更优雅的方法可以为脚本划上一个句号。
+  * hell中运行的每个命令都使用退出状态码(exit status)告诉shell它已经运行完毕。退出状态码是一个0~255的整数值,在命令结束运行时由命令传给shell。可以捕获这个值并在脚本中使用。
+#### 查看退出状态码  
+  * Linux提供了一个专门的变量 $? 来保存上个已执行命令的退出状态码。
+    ````bash
+    date
+    echo $?
+    ```
+  * 按照惯例,一个成功结束的命令的退出状态码是 0 。  
+  * 无效命令会返回一个退出状态码 127。
+  * Linux 状态码
+    * 0 命令成功结束
+    * 1 一般性未知错误
+    * 2 不适合的shell命令
+    * 126 命令不可执行
+    * 127 没找到命令
+    * 128 无效的退出参数
+    * 128+x 与Linux信号x相关的严重错误
+    * 130 通过Ctrl+C终止的命令
+    * 255 正常范围之外的退出状态码
+#### exit 命令
+  * exit 命令可以指定退出状态码    
+    ```bash
+    exit 5
+    ```
+    ```text
+    #!/bin/bash
+    echo Hello
+    exit 100
+    ```
+  * 退出状态码最大只能是 255，退出状态码被缩减到了0~255的区间。shell通过模运算得到这个结果。一个值的模就是被除后的余数。最终的结果是指定的数值除以256后得到的余数
+
+## shell 流程控制，结构化命令
+  * if-then
+  * if-then-else
+  * if-then-elif-then
+  * case
+  * 可以嵌套
+### if-then
+  * 格式：  
+    ```text
+    if  command
+    then
+      command
+    fi  
+    ```
+    ```text
+    if  command ; then
+      command
+    fi  
+    ```
+  * bash shell的 if 语句会运行 if 后面的那个命令。如果该命令的退出状态码(参见第11章)是 0(该命令成功运行),位于 then 部分的命令就会被执行。 如果该命令的退出状态码是其他值, then部分的命令就不会被执行。
+  * fi 语句用来表示 if-then语句到此结束。
+  * 例子：
+    ```text
+    #!/bin/bash
+    # testing the if statement
+    if pwd
+    then
+      echo "It worked"
+    fi
+    ```
+### if-then-else
+  * 语法
+    ```text
+    if command
+    then
+      commands
+    else
+      commands
+    fi
+    ```    
+### if-then-elif-then
+  * 语法
+  ```text
+  if command1
+  then
+    commands
+  elif command2
+  then
+    more commands
+  fi
+  ```    
+### test  命令
+  * if-then 语句不能测试命令退出状态码之外的条件
+  * test命令提供了在if-then语句中测试不同条件的途径。如果test命令后列出的条件成立，则test命令就会退出并返回状态码0，否则返回非0的状态码。
+  * test命令格式是：test condition
+    ```text
+    if test condition
+    then
+      command
+    fi  
+    ```
+  * 另一种测试方法 [  ]，无需使用test命令,注意[  ] 要有空格，否则会报错。方括号是与 test 命令同义的特殊bash命令
+    ```text
+    if [ condition ]
+    then
+      command
+    fi  
+    ```
+#### 使用test 进行数值比较，数值必须是整数，浮点数会报错。
+  * n1 -eq n2 检查 n1 是否与 n2 相等
+  * n1 -ge n2 检查 n1 是否大于或等于 n2
+  * n1 -gt n2 检查 n1 是否大于 n2
+  * n1 -le n2 检查 n1 是否小于或等于 n2
+  * n1 -lt n2 检查 n1 是否小于 n2
+  * n1 -ne n2 检查 n1 是否不等于 n2 
+#### 使用test进行字符串比较       
+  * str1 = str2 检查 str1 是否和 str2 相同
+  * str1 != str2 检查 str1 是否和 str2 不同
+  * str1 < str2 检查 str1 是否比 str2 小 （ 默认当作重定向，使用时需要转义 ）
+  * str1 > str2 检查 str1 是否比 str2 大 （使用时需要转义）
+  * -n str1 检查 str1 的长度是否非0
+  * -z str1 检查 str1 的长度是否为0
+
+  * 两点注意：
+    * 1、大小比较时要转义 < >
+    * 2、大小比较时 test 的比较方法与sort的比较方法不同。
+      * test 大写字母被认为是小于小写字母的。但 sort 命令恰好相反
+      * 比较测试中使用的是标准的ASCII顺序,根据每个字符的ASCII数值来决定排序结果。 sort命令使用的是系统的本地化语言设置中定义的排序顺序。对于英语,本地化设置指定了在排序顺序中小写字母出现在大写字母前。
+  * test 命令和测试表达式使用标准的数学比较符号来表示字符串比较,而用文本代码来表示数值比较。这个细微的特性被很多程序员理解反了。如果你对数值使用了数学运算符号,shell会将它们当成字符串值,可能无法得到正确的结果。 
+  * 空的和未初始化的变量会对shell脚本测试造成灾难性的影响。如果不是很确定一个变量的内容,最好在将其用于数值或字符串比较之前先通过 -n 或 -z 来测试一下变量是否含有值。   
+#### test 文件比较
+  * 测试Linux文件系统上文件和目录的状态
+    * -d file 检查 file 是否存在并是一个目录
+    * -e file 检查 file 是否存在
+    * -f file 检查 file 是否存在并是一个文件
+    * -r file 检查 file 是否存在并可读
+    * -s file 检查 file 是否存在并非空
+    * -w file 检查 file 是否存在并可写
+    * -x file 检查 file 是否存在并可执行
+    * -O file 检查 file 是否存在并属当前用户所有
+    * -G file 检查 file 是否存在并且默认组与当前用户相同
+    * file1 -nt file2 检查 file1 是否比 file2 新
+    * file1 -ot file2 检查 file1 是否比 file2 旧
+#### 复合测试条件
+  * if-then 语句允许你使用布尔逻辑来组合测试
+    * [ condition1 ] && [ condition2 ]
+    * [ condition1 ] || [ condition2 ]
+    * test condition1 && test condition2
+    * test condition1 || test condition2
+  * 例子：
+    ```text
+    #!/bin/bash
+    if [ -d $HOME/aa ]  && [ $USER == test]
+    then
+      echo OK
+    else
+      echo not OK  
+    fi
+    ```
+#### if-then 的高级特性
+  * 两个高级特性
+    * 用于数学表达式的双括号 (( expression ))      
+    * 用于高级字符串处理的双方括号 [[ expression ]]
+  * 双括号命令符号(()),用法同其他编程语言
+    * val++ 后增 ,(  centos 7 报错 )
+    * val-- 后减  ，(  centos 7 报错 )
+    * ++val 先增 ，(  centos 7 无效 )
+    * --val 先减 ，(  centos 7 无效 )
+    * ! 逻辑求反
+    * ~ 位求反
+    * ** 幂运算
+    * << 左位移
+    * >> 右位移
+    * & 位布尔和
+    * | 位布尔或
+    * && 逻辑和
+    * || 逻辑或 
+  * 双方括号 [[]]  里的 expression 使用了test命令中采用的标准字符串比较。但是它提供了另一个特性——模式匹配
+    ```text
+    if [[ $USER == t* ]]
+    then
+      echo OK
+    else
+      echo Not OK
+    fi    
+    ```
+  * 双方括号在bash shell中工作良好。不过要小心,不是所有的shell都支持双方括号。
+
+### case
+  * 格式：      
+    ```text
+    case    $var_name   in
+    pattern1 | pattern2) 
+      commands
+    ;;
+    pattern3) 
+      commands
+    ;;
+    *) 
+      dufault commands
+    ;;
+    esac
+    ``` 
+## 循环
+  * for
+  * while
+  * until
+### for 循环
+  * 格式
+  ```text
+  for var_name in value_list
+  do
+    commands
+  done
+  ```  
+  ```text
+  for var_name in value_list ; do
+    commands
+  done
+  ```  
+  * 例子：
+  ```text
+  #!/bin/bash
+  names=(Larry Herry Tom)
+  for name in "${names[@]}"
+  do
+    echo $name
+  done  
+  ```
+  ```text
+  #!/bin/bash
+  for name in Larry Herry Tom
+  do
+    echo $name
+  done  
+  echo $name # 变量依然存在
+  ```
+  * 引号特例
+  ```text
+  #!/bin/bash
+  for name in I Don't know if this'll work
+  do
+    echo $name
+  done  
+  ```
+  ```text
+  #!/bin/bash
+  for name in I Don\'t know if "this'll" work
+  do
+    echo $name
+  done  
+  ```
+  * 从变量读取列表
+    ```text
+    #!/bin/bash
+    names="Larry Herry Tom"
+    names=$names" Jone"
+    for name in $names
+    do
+      echo $name
+    done  
+    ```
+    ```text
+    #!/bin/bash
+    names=(Larry Herry Tom)
+    for name in ${names[*]}
+    do
+      echo $name
+    done  
+    ```
+#### 修改字段分隔符
+  * 默认情况下bash shell 会将下列字符当作字段分隔符
+    * 空格
+    * 制表符
+    * 还行符
+  * 可以通过修改特殊环境变量IFS来设置指定的字段分隔符    
+    ```bash
+    IFS=$'\n'
+    ```
+  * 例如在处理可能含有空格的数据(比如文件名)时,使用默认的IFS会非常麻烦 。
+    ```text
+    #!/bin/bash
+    file=states
+    oldIFS=$IFS # 备份IFS
+    IFS=$'\n'
+    for state in $(cat $file)
+    do
+      echo $state
+    done 
+    IFS=$oldIFS # 设置回原来的值
+    ```
+    * 在处理代码量较大的脚本时,可能在一个地方需要修改 IFS 的值,然后忽略这次修改,在脚本的其他地方继续沿用 IFS 的默认值。一个可参考的安全实践是在改变 IFS 之前保存原来的 IFS 值,之后再恢复它。
+    * 如果要为IFS设置多个值，只要将他们的值串联起来即可。
+      ```bash
+      IFS=$'\n':;" 
+      ```
+      * 上面为IFS设置了四个值： 还行符、冒号、分号、双引号
+#### 使用通配符读取目录
+  * 如果不知道所有的文件名,这个特性在处理目录中的文件时就非常好用。
+  ```bash
+  for file in /home/test/download/*
+  do
+    if [ -d $file ]
+    then
+      echo "$file is a dir"
+    elif [ -f $file ]  
+    then
+      echo "$file is file"
+    fi
+  done    
+  ```      
+#### bash类C语言风格的for循环
+  * 格式：
+    * for (( variable assignment ; condition ; iteration process ))
+  * 例子：
+    ```bash
+    for (( i = 0; i < 10; i++ ))
+    do
+      echo $i
+    done  
+    ```  
+    ```bash
+    nameArr=(Larry Herry Tom Jone)
+    for (( i = 0; i < ${#nameArr[*]}; i++ ))
+    do
+      echo ${nameArr[i]}
+    done  
+    ```  
+##### for循环时使用多个变量
+  * C语言风格的 for 命令也允许为迭代使用多个变量。循环会单独处理每个变量,你可以为每个变量定义不同的迭代过程。尽管可以使用多个变量,但你只能在 for 循环中定义一种条件。
+    ```bash
+    for (( i = 0, j = 10; i < 10; i++ ,j-- ))
+    do
+      echo "$i --- $j"
+    done  
+    ```
+### while 循环
+  * 格式：
+    ```text
+    while test command
+    do
+      commands
+    done  
+    ```    
+  * while 命令中定义的 test command 和 if-then 语句中的格式一模一样
+  * 注意：while 命令允许你在 while 语句行定义多个测试命令。只有最后一个测试命令的退出状态码会被用来决定什么时候结束循环。如果你不够小心,可能会导致一些有意思的结果。
+    ```text
+    #!/bin/bash
+    # testing a multicommand while loop
+    var1=10
+    while echo $var1
+            [ $var1 -ge 0 ]
+    do
+      echo "This is inside the loop"
+      var1=$[ $var1 - 1 ]
+    done
+    ```
+### until 循环
+  * 格式：
+    ```text
+    until test command
+    do
+      commands
+    done  
+    ```
+  * 可以在until 命令语句中放入多个测试命令。只有最后一个命令的退出状态码决定了bash shell是否继续执行。
+### 嵌套循环
+  * 与其他语言类似，循环可以嵌套
+### 循环处理文件数据
+  ```bash
+  oldIFS=$IFS
+  IFS=$'\n'
+  for entry in $(cat /etc/passwd)
+  do
+    echo "Values in $entry "
+    IFS=:
+    for value in $entry
+    do
+      echo "    $value"
+    done
+  done
+  IFS=oldIFS     
+  ```
