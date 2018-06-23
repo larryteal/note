@@ -826,7 +826,6 @@
       n1=100
       n2=$n1
       ```
-    * 变量值有多个参此  
     * 变量值有多个单词组成时要用引号（单引号或双引号）引起来
       * 单因号的值会原样输出，无法引用变量
       * 双引号内可以使用变量
@@ -900,7 +899,7 @@
       ```
     * 使用 $[  ] 的方式，[]内是数学表达式，
       ```bash
-      res=$[1+1]  # [] 内以及运算符两边不是必须有空格
+      res=$[1+1]  # [] 内以及运算符两边不是必须有空格，乘法运算也不需要转义*
       ```
       ```bash
       n1=100
@@ -1136,11 +1135,11 @@
   * 两个高级特性
     * 用于数学表达式的双括号 (( expression ))      
     * 用于高级字符串处理的双方括号 [[ expression ]]
-  * 双括号命令符号(()),用法同其他编程语言
-    * val++ 后增 ,(  centos 7 报错 )
-    * val-- 后减  ，(  centos 7 报错 )
-    * ++val 先增 ，(  centos 7 无效 )
-    * --val 先减 ，(  centos 7 无效 )
+  * 双括号命令符号(()),其中的表达式用法同其他编程语言
+    * val++ 后增 ,
+    * val-- 后减  ，
+    * ++val 先增 ，
+    * --val 先减 ，
     * ! 逻辑求反
     * ~ 位求反
     * ** 幂运算
@@ -1356,3 +1355,524 @@
   done
   IFS=oldIFS     
   ```
+### 循环控制
+  * break
+    * 默认退出当前正在执行的循环
+    * break 可以接受一个参数 n（默认为1），n是正整数表示要停止第n层循环（嵌套循环的情况），如果你将 n 设为 2 , break 命令就会停止下一级的外部循环（内部也同时停掉了，仿佛是C语言的goto到了外层的done）
+  * continue  
+    * 停止本次循环进入下一次循环
+    * 与break一样continue也可以指定参数n
+### 处理循环输出（循环输出的重定向）    
+  * 在shell脚本中，你可以对循环的输出使用管道或重定向，管道或重定向写在done之后
+    ```text
+    for test command
+    do
+      commands
+      echo "Somthing"
+    done > out.txt 
+    ```   
+    ```text
+    for test command
+    do
+      commands
+      echo "Somthing"
+    done | grep ing | sort
+    ```   
+### 循环实例
+  * 查找可执行文件
+    ```bash
+    IFS=:
+    for dir in $PATH
+    do
+      echo "$dir"
+      for file in $dir/*
+      do
+        if [ -x $file ]
+        then
+          echo "    $file"
+        fi
+      done
+    done
+    ```
+  * 创建多个用户账户
+    * 输入文件每一行的格式为:  userid,user  name
+    ```bash
+    input="users.csv"
+    while IFS=',' read -r userid name
+    do
+      echo "adding $userid"
+      useradd -c "$name" -m $userid
+    done < "$input"
+    ```  
+## 处理用户输入
+
+### 命令行参数
+  * 使用 $n   的方式获取命令行参数
+    ```bash
+    ./add.sh  10 20
+    ```
+    * $0 执行时使用的脚本路径，对应上面命令的 ./add.sh,( 根据执行方式的不同只可能不同：add.sh 、 /home/test/add.sh )
+      * 如果只需要文件名称（去除路径），可以使用basename 命令获取
+        ```bash
+        name=$(basename $0)
+        ```
+    * $1 是第一个参数，对应上面命令的 10
+    * $2 是第一个参数，对应上面命令的 20
+    * 以此类推 
+    * $* 或 $@ 参数列表，对应上面命令的 10 20
+    * $# 参数个数，对应上面的命令值为 2。
+    * 参数以空格分隔，如果参数含有空格需要使用引号引起来。
+    * 在条件语句中使用 $1 等变量时尽量加双引号 "$1" ，否则有可能会报错，例如我在使用 if [ $1 == admin ] 时，且运行脚本没有传递参数的情况报错。
+#### shift 移动命令行参数
+  * 在使用 shift 命令时,默认情况下它会将每个参数变量向左移动一个位置
+  * shift 也可以接受一个参数来指定移动几个位置。
+  * 例子
+    ```bash
+    echo "$1"
+    shift
+    echo "$1"
+    ```
+    ```bash
+    echo "$1"
+    shift 2
+    echo "$1"
+    ```
+    ```bash
+    while [ -n "$1" ]
+    do
+      echo "$1"
+      shift
+    done  
+    ```
+  * 使用 shift 命令的时候要小心。如果某个参数被移出,它的值就被丢弃了,无法再恢复。
+### 处理选项
+#### 查找选项
+  * 例子1，处理单选项
+  ```bash
+  #!/bin/bash
+  # extracting command line options as parameters
+  #
+  echo
+  while [ -n "$1" ]
+  do
+    case "$1" in
+      -a) echo "Found the -a option" ;;
+      -b) echo "Found the -b option" ;;
+      -c) echo "Found the -c option" ;;
+      *) echo "$1 is not an option" ;;
+    esac
+    shift
+  done  
+  # ./test.sh -c -a -b
+  ```
+  * 例子2、分离参数和选项
+    * 你会经常遇到想在shell脚本中同时使用选项和参数的情况。Linux中处理这个问题的标准方式是用特殊字符来将二者分开,该字符会告诉脚本何时选项结束以及普通参数何时开始。
+    * 这个特殊字符是双破折线( -- )
+    ```bash
+    #!/bin/bash
+    # extracting options and parameters
+    echo
+    while [ -n "$1" ]
+    do
+      case "$1" in
+        -a) echo "Found the -a option" ;;
+        -b) echo "Found the -b option";;
+        -c) echo "Found the -c option" ;;
+        --) shift
+            break ;;
+        *) echo "$1 is not an option";;
+        esac
+      shift
+    done  
+    # ./test.sh -c -a -b -- test1 test2 test3  
+    ```
+  * 例子3、处理带值的选项
+    ```bash
+    #!/bin/bash
+    # extracting command line options and values
+    echo
+    while [ -n "$1" ]
+    do
+      case "$1" in
+      -a) echo "Found the -a option";;
+      -b) param="$2"
+          echo "Found the -b option, with parameter value $param"
+          shift ;;
+      -c) echo "Found the -c option";;
+      --) shift
+          break ;;
+      *) echo "$1 is not an option";;
+      esac
+      shift
+    done  
+    # ./test.sh -a -b test1 -d  
+    ```  
+  * 现在shell脚本中已经有了处理命令行选项的基本能力,但还有一些限制。比如,如果你想将多个选项放进一个参数中时,它就不能工作了  
+  * 在Linux中,合并选项是一个很常见的用法,而且如果脚本想要对用户更友好一些,也要给用户提供这种特性。幸好,有另外一种处理选项的方法能够帮忙。
+#### 使用 getopt 命令  
+  * getopt 命令可以接受一系列任意形式的命令行选项和参数,并自动将它们转换成适当的格式。它的命令格式如下:
+    * getopt optstring parameters
+    * optstring 是这个过程的关键所在。它定义了命令行有效的选项字母,还定义了哪些选项字母需要参数值。
+    * 首先,在 optstring 中列出你要在脚本中用到的每个命令行选项字母。然后,在每个需要参数值的选项字母后加一个冒号。 getopt 命令会基于你定义的 optstring 解析提供的参数。
+    * getopt 命令有一个更高级的版本叫作 getopts (注意这是复数形式)
+    * 例子： 
+      * getopt ab:cd -a -b test1 -cd test2 test3
+      * 处理结果： -a -b test1 -c -d -- test2 test3
+      * optstring 定义了四个有效选项字母: a 、 b 、 c 和 d 。冒号( : )被放在了字母 b 后面,因为 b选项需要一个参数值。
+    * 如果指定了一个不在 optstring 中的选项,默认情况下, getopt 命令会产生一条错误消息。如果想忽略这条错误消息,可以在命令后加 -q 选项。
+      * getopt -q ab:cd -a -b test1 -cde test2 test3
+    * 例子
+      ```bash
+      # Extract command line options & values with getopt
+      #
+      set -- $(getopt -q ab:cd "$@")
+      #
+      echo
+      while [ -n "$1" ]
+      do
+        case "$1" in
+        -a) echo "Found the -a option" ;;
+        -b) param="$2"
+            echo "Found the -b option, with parameter value $param"
+            shift ;;
+        -c) echo "Found the -c option" ;;
+            --) shift
+            break ;;
+        *) echo "$1 is not an option";;
+        esac
+        shift
+        done
+        #
+        count=1
+        for param in "$@"
+        do
+          echo "Parameter #$count: $param"
+          count=$[ $count + 1 ]
+        done
+      ```
+  * getopt 命令并不擅长处理带空格和引号的参数值。它会将空格当作参数分隔符,而不是根据双引号将二者当作一个参数。幸而还有另外一个办法能解决这个问题。
+    * ./test.sh -a -b test1 -cd "test2 test3" test4
+####  使用更高级的 getopts  
+  * getopts 命令(注意是复数)内建于bash shell。它跟近亲 getopt 看起来很像,但多了一些扩展功能。
+
+### 将选项标准化
+  * 有些字母选项在Linux世界里已经拥有了某种程度的标准含义。如果你能在shell脚本中支持这些选项,脚本看起来能更友好一些。
+    *  -a 显示所有对象
+    *  -c 生成一个计数
+    *  -d 指定一个目录
+    *  -e 扩展一个对象
+    *  -f 指定读入数据的文件
+    *  -h 显示命令的帮助信息
+    *  -i 忽略文本大小写
+    *  -l 产生输出的长格式版本
+    *  -n 使用非交互模式(批处理)
+    *  -o 将所有输出重定向到的指定的输出文件
+    *  -q 以安静模式运行
+    *  -r 递归地处理目录和文件
+    *  -s 以安静模式运行
+    *  -v 生成详细输出
+    *  -x 排除某个对象
+    *  -y 对所有问题回答yes  
+### 读取用户输入 read
+  * 格式
+    * read [options]  [var_name ...]
+      ```bash
+      read name
+      read firstName lastName
+      read -p "请输入年龄： " age
+      echo $name
+      echo $age
+      ```
+     * 选项
+      * -p "提示信息"  ( 提示信息也可以使用echo打印，如果需要提示信息和输入为值在同一行可以使用echo -n  )
+      ```bash
+      read -p "请输入姓名： " name
+      echo -n "请输入姓名：" name
+      ```
+      * -t 设置超时，超过指定的秒数read命令返回一个非0的状态码。
+      ```bash
+      if read -t 15 -p "请在15秒内输入验证码：" code
+      then
+        echo $code
+      else
+        echo "没有输入验证码"  
+      fi  
+      ```
+      * -n 限定输入字符数，当输入字符满足设定时自动结束输入
+        ```bash
+        read -n1 -p "要继续吗？[Y/N]" answer
+        case $answer in
+          Y | y)
+              echo
+              echo "继续"  
+              ;;         
+          N | n)
+              echo
+              echo "结束"   
+              exit 0
+              ;;
+        esac
+        ```
+        * -s 使输入的内容不回显，密码等不回显会更好些。
+          ```bash
+          read -s -p "请输入密码：" pass
+          ```
+    * read 可以有多个变量也可以没有变量
+      * 没有变量的情况用户的所有输入将会被保存到REPLY环境变量中
+      ```bash
+      read -p "请输入姓名："  
+      echo "name is $REPLY"
+      ```
+    * 通过管道读入输入
+      ```bash
+      count=1;
+      cat test | while read line
+      do
+        echo "第$count行数据是： $line"
+        count=$[ $count + 1 ]
+      done  
+      ``` 
+    * 从文件中读入数据（重定向）   
+      ```bash
+      count=1
+      while read line
+      do
+        echo "第$count行数据是： $line"
+        count=$[ $count + 1 ]
+      done < test.txt
+      ```
+## 呈现数据
+
+### 重定向
+  * 标准文件描述符
+    * 每个进程一次最多可以有九个文件描述符。出于特殊目的,bash shell保留了前三个文件描述符( 0 、 1 和 2 ),
+     *    0   STDIN     标准输入
+     *    1   STDOUT  标准输出
+     *    2   STDERR  标准错误
+  * 重定向错误输出到文件
+    * 在重定向符前加上错误文件描述符  
+      * 只重定向错误 
+      ```bash
+      ls  not_exit_file  2> out.txt 
+      ```
+      * 即重定向错误又重定向数据（分不同的文件）
+      ```bash
+      ls  not_exit_file  exit_file  2> out_err.txt  1> out_ok.txt 
+      ``` 
+      ```bash
+      ls  not_exit_file  exit_file  2> out_err.txt  > out_ok.txt 
+      ``` 
+      * 把标准错误STDERR与标准输出重定向到一个文件
+        ```bash
+        ls  not_exit_file  exit_file  &> out.txt 
+        ```
+#### 在脚本中重定向输出
+  * 临时重定向
+    ```bash
+    echo  "这是错误消息 " >&2
+    echo "这是正常输出信息"
+    ``` 
+    * 这个方法非常适合在脚本中生成错误消息。 
+  * 永久重定向
+    * 如果脚本中有大量数据需要重定向,那重定向每个 echo 语句就会很烦琐。取而代之,你可以用 exec 命令告诉shell在脚本执行期间重定向某个特定文件描述符。 
+    ```bash
+    #!/bin/bash
+    # redirecting all output to a file
+    exec 1>testout
+    echo "This is a test of redirecting all output"
+    echo "from a script to another file."
+    echo "without having to redirect every individual line"
+    ```
+    ```bash
+    #!/bin/bash
+    # redirecting output to different locations
+    exec 2>testerror
+    echo "This is the start of the script"
+    echo "now redirecting all output to another location"
+    exec 1>testout
+    echo "This output should go to the testout file"
+    echo "but this should go to the testerror file" >&2    
+    ```
+#### 在脚本中重定向输入
+  ```bash
+    exec 0< testfile
+    count=1
+    7
+    while read line
+    do
+    echo "Line #$count: $line"
+    count=$[ $count + 1 ]
+    done  
+  ```    
+### 创建临时文件 mktemp
+  *   Linux使用/tmp目录来存放不需要永久保留的文件。大多数Linux发行版配置了系统在启动时自动删除/tmp目录的所有文件。
+  * 系统上的任何用户账户都有权限在读写/tmp目录中的文件。这个特性为你提供了一种创建临时文件的简单方法,而且还不用操心清理工作。
+  * 语法，模板可以包含任意文本文件名,在文件名末尾加上多个 X 就行了。mktemp会生成字符替换X
+    * mktemp testing.XXXXXX
+  * 例子  
+  ```bash
+  tempfile=$(mktemp test19.XXXXXX)
+  echo "hello temp" > tempfile
+  cat tempfile
+  ```  
+#### 在/tmp 目录创建临时文件
+  * 使用 -t 选项强制 mktemp 命令来在系统的临时目录来创建临时文件
+#### 创建临时目录
+  * -d  ，  命令 mktemp 来创建一个临时目录而不是临时文件
+### 同时将信息发送到显示器和文件 tee
+  *   tee 命令相当于管道的一个T型接头。它将从 STDIN 过来的数据同时发往两处。一处是STDOUT ,另一处是 tee 命令行所指定的文件名:
+  ```bash
+  ls | tee ls.out
+  ```
+  * 使用 -a 参数 使 tee 追加文件
+  ```bash
+  ls | tee -a ls.out
+  ```
+## 控制脚本
+
+### 处理信号
+  *   Linux 信号
+    *  1   SIGHUP    挂起进程
+    *  2   SIGINT     终止进程    
+    *  3   SIGQUIT   停止进程
+    *  9   SIGKILL    无条件终止进程
+    *  15 SIGTERM  尽可能终止进程
+    *  17 SIGSTOP  无条件停止进程,但不是终止进程
+    *  18 SIGTSTP   停止或暂停进程,但不终止进程
+    *  19 SIGCONT  继续运行停止的进程
+  * Ctrl+C组合键会生成 SIGINT 信号  
+  * Ctrl+Z组合键会生成一个 SIGTSTP 信号
+  * 默认情况下,bash shell会忽略收到的任何 SIGQUIT (3) 和 SIGTERM (5) 信号(正因为这样,交互式shell才不会被意外终止)。但是bash shell会处理收到的 SIGHUP (1) 和 SIGINT (2) 信号。
+  * 捕获信号 trap
+    ```text
+    trap  commands  singnals
+    ```
+    * 在 trap 命令行上,你只要列出想要shell执行的命令,以及一组用空格分开的待捕获的信号。你可以用数值或Linux信号名来指定信号。
+      ```bash
+      #!/bin/bash
+      # Testing signal trapping
+      #
+      trap "echo ' Sorry! I have trapped Ctrl-C'" SIGINT
+      #
+      echo This is a test script
+      #
+      count=1
+      while [ $count -le 10 ]
+      do
+      echo "Loop #$count"
+      sleep 1
+      count=$[ $count + 1 ]
+      done      
+      ```
+    * 捕获脚本退出
+      ```bash
+      #!/bin/bash
+      # Trapping the script exit
+      #
+      trap "echo Goodbye..." EXIT
+      #
+      count=1
+      while [ $count -le 5 ]
+      do
+      echo "Loop #$count"
+      sleep 1
+      count=$[ $count + 1 ]
+      done      
+      ```  
+    * 删除已设置好的信号
+      * trap -- SIGINT 
+      * 也可以在 trap 命令后使用单破折号来恢复信号的默认行为。 
+### 后台运行脚本
+  * 只要在命令后加个 & 符就行了。  
+    ```bash
+    ./test.sh  &
+    ```
+  *   [1]   3231  ,方括号中的数字是shell分配给后台进程的作业号。下一个数是Linux系统分配给进程的进程ID(PID)。
+  * 注意,当后台进程运行时,它仍然会使用终端显示器来显示 STDOUT 和 STDERR 消息。
+### 在非控制台下运行脚本 nohup
+  *   有时你会想在终端会话中启动shell脚本,然后让脚本一直以后台模式运行到结束,即使你退出了终端会话。这可以用 nohup 命令来实现。
+  ```bash
+  nohub ./test.sh &
+  ```
+  * 当你使用 nohup 命令时,如果关闭该会话,脚本会忽略终端会话发过来的 SIGHUP 信号。由于 nohup 命令会解除终端与进程的关联,进程也就不再同 STDOUT 和 STDERR 联系在一起。为了保存该命令产生的输出, nohup 命令会自动将 STDOUT 和 STDERR 的消息重定向到一个名为nohup.out的文件中。
+
+### jobs 作业的控制
+  * jobs 命令允许查看shell当前正在处理的作业。
+    *  -l 列出进程的PID以及作业号
+    *  -n 只列出上次shell发出的通知后改变了状态的作业
+    *  -p 只列出作业的PID
+    *  -r 只列出运行中的作业
+    *  -s 只列出已停止的作业
+  * 你可能注意到了 jobs 命令输出中的加号和减号。带加号的作业会被当做默认作业。在使用作业控制命令时,如果未在命令行指定任何作业号,该作业会被当成作业控制命令的操作对象。    
+  * 当前的默认作业完成处理后,带减号的作业成为下一个默认作业。任何时候都只有一个带加号的作业和一个带减号的作业,不管shell中有多少个正在运行的作业。
+#### 重启停止的作业
+  * bg  + 作业号 ，后台模式重启
+    ```bash
+    bg 1
+    ```
+  * fg + 作业号 ，前台模式重启
+    ```bash
+    fg 1
+    ```
+### 调整谦让度
+  * 调度优先级是个整数值,从-20(最高优先级)到+19(最低优先级)。默认情况下,bash shell以优先级0来启动所有进程。（  值越小获得CPU时间的机会越高。 ）      
+  * nice 命令允许你设置命令启动时的调度优先级。要让命令以更低的优先级运行,只要用 nice的 -n 命令行来指定新的优先级级别。
+  ```bash
+  nice -n 10 ./test.sh &
+  ps -p 7812  -o pid,ppid,ni,cmd
+  ```
+####  改变已运行进程的优先级 renice
+  * 通过PID改变以运行进程的优先级
+    * renice -n 10 -p 5055
+  * 只能对属于你的进程执行 renice ;
+  * 只能通过 renice 降低进程的优先级;
+  * root用户可以通过 renice 来任意调整进程的优先级。    
+### 定时任务 （at 命令和 cron 表）
+  * 在预定的时间运行脚本
+####   用 at 命令来计划执行作业
+####   用 cron 命令来计划执行作业
+  * anacron
+## 函数
+  * 格式
+    ```bash
+    function name {
+      commands
+    }
+    ```
+    ```bash
+    name() {
+      commands
+    }
+    ```
+    ```bash
+    function name() {
+      commands
+    }
+    ```
+  * 调用函数时直接使用函数名，不能加括号
+  ```bash
+  la() {
+    ls -al
+  }
+  la
+  ```  
+### 返回值
+  * bash shell会把函数当作一个小型脚本,运行结束时会返回一个退出状态码
+  * 默认返回状态码的值是函数最后一行命令的执行状态码
+  * 可以使用return 指定返回状态码（0 ～ 255）
+  * 使用函数输出
+    ```bash
+    add() {
+      echo $[ $1 + $2 ]
+    }
+    res=$( add 2 5 )
+    ```
+  * 在函数内使用局部变量
+    * 声明变量前加 local 关键字
+    ```bash
+    fn1() {
+      local as=2
+    }
+    ``` 
+    * 没有使用local声明的变量都是全局变量
+    * local 关键字只能用在函数内部。
