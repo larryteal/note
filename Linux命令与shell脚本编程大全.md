@@ -1876,3 +1876,220 @@
     ``` 
     * 没有使用local声明的变量都是全局变量
     * local 关键字只能用在函数内部。
+    * 向函数传数组参数
+      * 无法直接传递，变通法
+      ```bash
+      numArr=(11 22 33)
+      fn() {
+        local parmArr=(`echo "$@"`)
+        echo "parmArr[*]"
+      }
+      fn ${numArr[*]}
+      ```
+    * 函数返回数组
+      * 同上  
+    * 函数递归
+      * 阶乘
+      ```bash
+      function factorial {
+        if [ $1 -eq 1 ]
+        then
+          echo 1
+        else
+          local temp=$[ $1 - 1 ]
+          local result='factorial $temp'
+          echo $[ $result * $1 ]
+        fi
+      }
+      ```  
+### 使用 source 命令或者点（.） 来导入库文件 
+  * 点 （.） 是 source  的简写形式，等价。   
+  * 通常直接在文件中执行外部脚本文件，shell会新建一个子shell来运行，那么这种直接运行的方式无法使用外部脚本中定义的方法或变量。
+  * 使用 source 命令和. 执行脚本时，shell不会新建一个子shell来执行，二是在当前shell中执行，这样就实现了类似导入库文件的效果。
+    ```bash
+    .  fun_lib.sh
+    fn1
+    fn2
+    ```
+    ```bash
+    source  fun_lib.sh
+    fn1
+    fn2
+    ```
+### 在命令行上使用函数
+  * 跟使用命令一样。
+  * 保证使用之前函数在当前命令行shell中可以访问。
+  * 在命令行上创建函数时要特别小心。不要跟已由的命令重名。否则会覆盖。  
+  * 在命令行直接定义函数：
+    * 直接写在一行
+    ```text
+    $   fn1() { echo FN1 }
+    $   fn1
+    ```  
+    * 多行
+    ```text
+    $   fn2() {
+    >   echo FN2
+    >   }  
+    $   fn2
+    ```
+### 持久化函数
+  * 把函数写到 .bashrc 文件中，每次启动shell时这个文件都会被执行，无论是交互式shell还是非交互式的执行shell。
+  * 在.bashrc使用source命令导入其他脚本文件     
+### 使用开源库函数
+  * shtool 库函数  
+
+##  图形化shell
+### 文本窗口
+  * echo 打印选项菜单，结合read、 case 完成选项操作
+  * 使用 select 命令，select 命令只需要一条命令就可以创建出菜单,然后获取输入的答案并自动处理。
+    * 格式：
+      ```text
+      select variable in list
+      do
+      commands
+      done
+      ```
+    * list 参数是由空格分隔的文本选项列表,这些列表构成了整个菜单
+    * select 命令会将每个列表项显示成一个带编号的选项,然后为选项显示一个由 PS3 环境变量定义的特殊提示符。
+      ```bash
+      PS3="Enter option: "
+      select option in "Display disk space" "Display logged on users"「
+      "Display memory usage" "Exit program"
+      do
+      case $option in
+      "Exit program")
+              break ;;
+      "Display disk space")
+              diskspace ;;
+      "Display logged on users")
+              whoseon ;;
+      "Display memory usage")
+              memusage ;;
+      *)
+              clear
+              echo "Sorry, wrong selection";;
+      esac
+      done
+      clear      
+      ```
+    * select 语句中的所有内容必须作为一行出现 
+### 图形化窗口
+  * 使用 dialog 库  
+    * 安装  
+    ```bash
+    sudo yum install dialog
+    ```
+    * 例子
+    ```bash
+    dialog --title Testing --msgbox "This is a test" 10 20
+    ```
+    ```bash
+    dialog --menu "Sys Admin Menu" 20 30 10 1 "Display disk space" 2 "Display users" 3 "Display memory usage" 4 "Exit" 2> test.txt
+    ```
+      *  --menu 第一个参数定义了菜单的标题,之后的两个参数定义了菜单窗口的高和宽,而第四个参数则定义了在窗口中一次显示的菜单项总数。如果有更多的选项,可以用方向键来滚动显示它们。
+    ```bash
+    dialog --inputbox "Enter your age: " 10 20 2>age.txt
+    ```
+    ```bash
+    dialog --textbox /etc/passwd 15 45
+    ```
+    ```bash
+    dialog --title "Select a file" --fselect $HOME/ 10 50 2>file.txt
+    ```
+      * 可以使用空格键确定选中，或者手动输入
+  * 使用$? 获取窗口执行退出状态
+    * Yes 、OK  状态是 0   
+    * No 、Cancel  状态是 1
+### 使用图形
+  * kdialog和zenity包 ，它们各自为KDE和GNOME桌面提供了图形化窗口部件
+####   GNOME 环境
+  * GNOME图形化环境支持两种流行的可生成标准窗口的包:
+    * gdialog
+    * zenity
+  * 到目前为止,zenity是大多数GNOME桌面Linux发行版上最常见的包(在Ubuntu和Fedora上默认安装)。
+##### zenity窗口部件
+  *  --calendar 显示一整月日历
+  *  --entry 显示文本输入对话窗口
+  *  --error 显示错误消息对话窗口  
+  *  --file-selection 显示完整的路径名和文件名对话窗口
+  *  --info 显示信息对话窗口
+  *  --list 显示多选列表或单选列表对话窗口
+  *  --notification 显示通知图标
+  *  --progress 显示进度条对话窗口
+  *  --question 显示yes/no对话窗口
+  *  --scale 显示可调整大小的窗口
+  *  --text-info 显示含有文本的文本框
+  *  --warning 显示警告对话窗口
+
+## sed和gawk工具
+### sed 编辑器
+  * sed编辑器被称作流编辑器(stream editor),和普通的交互式文本编辑器恰好相反。在交互式文本编辑器中(比如vim),你可以用键盘命令来交互式地插入、删除或替换数据中的文本。流编辑器则会在编辑器处理数据之前基于预先提供的一组规则来编辑数据流。
+  * sed编辑器会执行下列操作
+    * (1) 一次从输入中读取一行数据。
+    * (2) 根据所提供的编辑器命令匹配数据。
+    * (3) 按照命令修改流中的数据。
+    * (4) 将新的数据输出到 STDOUT 。   
+  * 在流编辑器将所有命令与一行数据匹配完毕后,它会读取下一行数据并重复这个过程。在流编辑器处理完流中的所有数据行后,它就会终止。   
+  * sed 命令格式
+    ```text
+    sed options script file
+    ```
+  * sed 命令选项
+    *  -e script 在处理输入时,将 script 中指定的命令添加到已有的命令中
+    *  -f file 在处理输入时,将 file 中指定的命令添加到已有的命令中
+    *  -n 不产生命令输出,使用 print 命令来完成输出  
+  * script 参数指定了应用于流数据上的单个命令。如果需要用多个命令,要么使用 -e 选项在命令行中指定,要么使用 -f 选项在单独的文件中指定  
+  * 例子1
+  ```bash
+  echo "This is a test" | sed 's/test/big test/'
+  ```
+  * 这个例子在sed编辑器中使用了 s 命令。 s 命令会用斜线间指定的第二个文本字符串来替换第一个文本字符串模式。在本例中是 big test 替换了 test 。
+  * 例子2
+  ```bash
+  sed 's/dog/cat/' data1.txt
+  ```
+  * 重要的是,要记住,sed编辑器并不会修改文本文件的数据。它只会将修改后的数据发送到STDOUT 。如果你查看原来的文本文件,它仍然保留着原始数据。
+  * 例子3
+  ```bash
+  sed -e 's/brown/green/;  s/dog/cat/' data1.txt
+  ```
+  * 要在 sed 命令行上执行多个命令时,只要用 -e 选项就可以了。
+  * 两个命令都作用到文件中的每行数据上。命令之间必须用分号隔开,并且在命令末尾和分号之间不能有空格。
+  * 另一种方式
+  ```text
+    $ sed -e '
+    > s/brown/green/
+    > s/fox/elephant/
+    > s/dog/cat/' data1.txt  
+  ```
+  * 例子4 ，从文件中读取编辑器命令
+  ```text
+    $ cat script1.sed
+      s/brown/green/
+      s/fox/elephant/
+      s/dog/cat/
+    $
+    $ sed -f script1.sed data1.txt  
+  ```
+  * 在这种情况下,不用在每条命令后面放一个分号。sed编辑器知道每行都是一条单独的命令。
+  * 可以使用.sed作为sed脚本文件的扩展名。
+### gawk 程序  
+  * 。 gawk程序让流编辑迈上了一个新的台阶,它提供了一种编程语言而不只是编辑器命令
+    * 定义变量来保存数据;
+    * 使用算术和字符串操作符来处理数据;
+    * 使用结构化编程概念(比如 if-then 语句和循环)来为数据处理增加处理逻辑;
+    * 通过提取数据文件中的数据元素,将其重新排列或格式化,生成格式化报告。  
+## 正则表达式
+  * 特殊字符
+    * .*[]^${}\+?|()    
+  * BRE特殊字符组  
+    *  [[:alpha:]] 匹配任意字母字符,不管是大写还是小写
+    *  [[:alnum:]] 匹配任意字母数字字符0~9、A~Z或a~z
+    *  [[:blank:]] 匹配空格或制表符
+    *  [[:digit:]] 匹配0~9之间的数字
+    *  [[:lower:]] 匹配小写字母字符a~z
+    *  [[:print:]] 匹配任意可打印字符
+    *  [[:punct:]] 匹配标点符号
+    *  [[:space:]] 匹配任意空白字符:空格、制表符、NL、FF、VT和CR
+    *  [[:upper:]] 匹配任意大写字母字符A~Z  
