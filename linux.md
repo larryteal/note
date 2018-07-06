@@ -134,6 +134,42 @@
   ```bash
   type -a pwd
   ```
+## mv 移动多个文件或目录
+  * 使用 -t 指定目标目录
+  * mv  dir1  dir2  dir3  -t  dest_dir
+## alternatives 软件多版本管理
+### java 版本控制
+  * 下载安装JDK （rpm包）
+  * sudo alternatives --config java  ( 列出选项 )
+  * java -version 
+
+## 控制台使用代理
+  * 安装 proxychains4
+  * 启动代理软件
+  * 默认配置文件为 /etc/proxychains.conf
+    ```text
+    # 主要配置项
+    socks5	127.0.0.1     1080
+    ```
+  * proxychains4 npm install express --save
+## 创建快捷方式
+  *  在目录 /usr/share/applications 下创建 xxxx.desktop 文件
+  * eg:  Android  Studio  
+    *  先键文件 /usr/share/applications/android-studio.desktop
+    * 内容为(根据软件实际安装位置配置)
+    ```text
+    [Desktop Entry]
+    Encoding=UTF-8
+    Name=AndroidStudio
+    Exec=/home/Larry/software/android-studio/bin/studio.sh
+    Icon=/home/Larry/software/android-studio/bin/studio.png
+    Categories=Utility;Development;
+    Version=3.1.3
+    Type=Application
+    Terminal=0
+    ```
+
+
 
 ## 小知识
   * tty 代表电传打字机(teletypewriter)。这是一个古老的名词,指的是一台用于发送消息的机器。  
