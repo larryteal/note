@@ -21,6 +21,10 @@
   ```bash
   tar -xvJf ***.tar.xz
   ```
+  * or ( 也可以不加v参数 )
+  ```bash
+  tar -xvf ***.tar.xz
+  ```
 ## 使用阿里云的 yum 源  
   * 参考帮助 https://opsx.alibaba.com/mirror
   * 1、备份
@@ -144,7 +148,7 @@
   * java -version 
 
 ## 控制台使用代理
-  * 安装 proxychains4
+  * 安装 proxychains4 (github,https://github.com/rofl0r/proxychains-ng)
   * 启动代理软件
   * 默认配置文件为 /etc/proxychains.conf
     ```text
@@ -152,6 +156,17 @@
     socks5	127.0.0.1     1080
     ```
   * proxychains4 npm install express --save
+## 浏览器根据规则列表自动选择代理或直连
+  * 前提,安装浏览器代理插件,SwitchyOmega
+  * 新建一个代理,情景模式的类型选择 '代理服务器',并设置好
+  * 再新建一个代理,情景模式的类型选择 '自动切换模式'
+    * 规则列表设置为 'AutoProxy',
+    * 填入规则列表网址,(github,https://github.com/larryteal/gfwlist)
+    * 点击立即更新情景模式
+    * 切换规则中的,规则列表 设置为上一步设置的代理
+    * 切换规则中的,	默认情景模式 设置为直连
+  * <img src="images/2018-07-26 14-21-46 的屏幕截图.png">
+  
 ## 创建快捷方式
   *  在目录 /usr/share/applications 下创建 xxxx.desktop 文件
   * eg:  Android  Studio  
@@ -168,9 +183,24 @@
     Type=Application
     Terminal=0
     ```
-
+## 挂载移动硬盘 （ntfs 文件格式）
+  * 安装 ntfs-3g 模块
+  * 安装后就可以在文件系统中访问了(自动挂载)
+  * 也可手动挂载
+  * 相关命令
+    ```bash
+      yum list *ntfs*
+      yum install ntfs-3g
+      mount -t ntfs-3g /dev/sdb1 /mnt/udisk
+    ```  
 
 
 ## 小知识
   * tty 代表电传打字机(teletypewriter)。这是一个古老的名词,指的是一台用于发送消息的机器。  
   * readlink –f  /usr/bin/vi ，它能够立刻找出链接文件的最后一环
+  * 查看ip地址
+    ```bash
+    ifconfig
+    ifconfig -a
+    ip  addr
+    ```
