@@ -80,6 +80,52 @@
   hostnamectl set-hostname new_hostname
   ```
 ## 防火墙管理 
+### 端口号管理
+#### firewall-cmd 
+  * 查看活动的 zone (作用域),一般默认是public
+    * firewall-cmd --get-active-zones
+  * 查看防火墙规则
+    * firewall-cmd --list-all
+  * 查看开启的端口号
+    * firewall-cmd --list-ports
+    * firewall-cmd --zone=public --list-ports  
+  * 开启指定端口号
+    * firewall-cmd --zone=public --add-port=80/tcp --permanent
+      * zone=作用域
+      * --add-port=端口号/协议
+      * --permanent #永久生效，没有此参数重启后失效
+  * 删除(关闭)指定端口号
+    * firewall-cmd --zone= public --remove-port=80/tcp --permanent 
+  * 重新载入配置
+    * firewall-cmd --reload
+  * 防火墙服务可以使用systemctl工具管理
+    * 停止防火墙服务
+      * systemctl stop firewalld
+    * 禁止firewall开机启动   
+      * systemctl disable firewalld   
+#### iptables
+  * 开启22号端口
+  ```bash
+  iptables -A INPUT -p tcp --dport 22 -j ACCEPT
+  iptables -A OUTPUT -p tcp --sport 22 -j ACCEPT
+  iptables -L -n # 查看信息
+
+  ```
+  * -A 参数就看成是添加一条 INPUT 的规则 
+  * -p 指定是什么协议 我们常用的tcp 协议，当然也有udp 例如53端口的DNS 
+  * –dport 就是目标端口 当数据从外部进入服务器为目标端口 
+  * –sport 数据从服务器出去 则为数据源端口使用 
+  * -j 就是指定是 ACCEPT 接收 或者 DROP 不接收
+##### Ubuntu下保存iptables规则并开机自动加载的方法
+  * 机器重启后，iptables中的配置信息会被清空。您可以将这些配置保存下来，让iptables在启动时自动加载，省得每次都得重新输入。iptables-save和iptables-restore 是用来保存和恢复设置的。
+  * iptables-save > /etc/iptables.up.rules  # 先将防火墙规则保存到/etc/iptables.up.rules文件中, 需要sudo su - root切换用户后执行，直接sudo cmd是不行的
+  * 然后修改脚本/etc/network/interfaces，使系统能自动应用这些规则
+  ```text
+  auto eth0 
+  iface eth0 inet dhcp 
+  pre-up iptables-restore < /etc/iptables.up.rules  # 就是加这句 !!
+  ````
+  
 
 
 ## 网络及进程状态
@@ -146,8 +192,8 @@
   * 下载安装JDK （rpm包）
   * sudo alternatives --config java  ( 列出选项 )
   * java -version 
-
-## 控制台使用代理
+## 使用代理
+### 控制台使用代理
   * 安装 proxychains4 (github,https://github.com/rofl0r/proxychains-ng)
   * 启动代理软件
   * 默认配置文件为 /etc/proxychains.conf
@@ -156,7 +202,7 @@
     socks5	127.0.0.1     1080
     ```
   * proxychains4 npm install express --save
-## 浏览器根据规则列表自动选择代理或直连
+### 浏览器根据规则列表自动选择代理或直连
   * 前提,安装浏览器代理插件,SwitchyOmega
   * 新建一个代理,情景模式的类型选择 '代理服务器',并设置好
   * 再新建一个代理,情景模式的类型选择 '自动切换模式'
@@ -166,7 +212,26 @@
     * 切换规则中的,规则列表 设置为上一步设置的代理
     * 切换规则中的,	默认情景模式 设置为直连
   * <img src="images/2018-07-26 14-21-46 的屏幕截图.png">
-  
+
+### wujie 代理设置
+  * 查看帮助
+    ```bash
+    ./ul --help
+    ```
+    ```text
+      Usage of ./ul:
+        -L string
+            listen address (default "127.0.0.1:9666")
+        -P string
+            http or sock proxy, example: 1.2.3.4:8080 or http://1.2.3.4:8080 or socks://1.2.4.4:1080 or socks5://1.2.3.4:1080 or socks=1.2.3.4:1080
+    ```
+  * 默认监听 127.0.0.1:9666
+  * 指定绑定的地址
+    ```bash
+    ./ul -L '192.168.16.158:9666'
+    ```
+  * -P 参数可以指定协议,http or sock
+      
 ## 创建快捷方式
   *  在目录 /usr/share/applications 下创建 xxxx.desktop 文件
   * eg:  Android  Studio  
@@ -195,6 +260,32 @@
     ```  
 
 
+## 查找
+### 文件查找
+  ```bash
+  find ./ -name file.name
+  ```
+### 在文件中搜索字符串,grep
+  * grep 的语法支持正则表达式
+  ```bash
+  grep  -nr   'target_string'  * # * 就是一般的bash通配符，表示当前目录所有文件，当然，你也可以写某个文件名
+  ```
+  * -n ,显示行号
+  * -r, 递归子目录
+  * -A num, --after-context=num: 在结果中同时输出匹配行之后的num行
+  * -B num, --before-context=num: 在结果中同时输出匹配行之前的num行，有时候我们需要显示几行上下文。
+  * -i, --ignore-case: 忽略大小写
+  * -v, --invert-match: 输出没有匹配的行
+  * l ,只列出匹配的文件名
+  * L,只列出不匹配的文件名
+  * -w 只匹配整个单词，而不是字符串的一部分
+  
+### 字符串替换
+  * sed -i "s/old/new/g" file1.txt file2.txt 可以将file*.txt中的所有old换成new。如果new什么都没有，就是表示删除old的意思。
+  * sed -i "s/http:\/\/yyy.xxx.edu.cn//g" $(grep -lr "http://yyy.xxx.edu.cn" *)  查找替换组合命令,把网址替换成了 /
+
+
+
 ## 小知识
   * tty 代表电传打字机(teletypewriter)。这是一个古老的名词,指的是一台用于发送消息的机器。  
   * readlink –f  /usr/bin/vi ，它能够立刻找出链接文件的最后一环
@@ -204,3 +295,12 @@
     ifconfig -a
     ip  addr
     ```
+  * 查看内存使用情况
+    ```bash
+    free -h
+    ```
+    * 参考 http://www.cnblogs.com/ggjucheng/archive/2013/01/14/2859613.html
+  * 查看cpu信息
+    ```bash
+    lscpu
+    ```    
