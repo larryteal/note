@@ -559,7 +559,660 @@
       ```
 
 
+## Menus
+  * 功能描述 : 侧边菜单栏
+  * 组件 : ion-menu
+  * 主要属性: 
+    * side: left / right
+    * content
+    * type: push / overlay / reveal
+    * enabled : true / false
+    * persistent : true / false
+    * swipeEnabled : true / false
+  * 相关服务: MenuController
+    * 相关方法: open , close ,toggle
+  * 使用: 
+    * 一般写在 src/app/app.html
+    * 使用时要与兄弟组件 ion-nav 一起使用
+    * ion-nav 组件要设置模板本地变量,且 ion-menu 的 content 属性设置为其变量值
+    ```
+    <ion-menu [content]="mycontent">
+      <ion-content>
+        <ion-list>
+          <button ion-item>men1</button>
+          <button ion-item>men2</button>
+        </ion-list>
+      </ion-content>
+    </ion-menu>
+    <ion-nav #mycontent [root]="rootPage"></ion-nav>
+    ```
+    * 在其他页面可以添加按钮并绑定设置 menuToggle 指令,可以显示或隐退菜单栏
+    * 按钮添加 menuClose 指令来关闭菜单栏,此指令一般添加再 ion-menu 组件内的button.
+    ```
+    <button ion-button menuToggle>
+      <ion-icon name="menu"></ion-icon>
+    </button>
+    --------------------------
+    <button ion-button [menuToggle]="activeMenu">
+      <ion-icon name="menu"></ion-icon>
+    </button>
+    ```
+    ```
+    <button ion-item menuClose>
+      关闭菜单
+    </button>
+    ```
 
+## Modals
+  * 功能描述: 弹出页面
+  * 相关服务: ModalController,NavParams,ViewController
+    * 服务不需要额外声明
+  * ModalController 实例方法:
+    * create(viewPage,jsonData,jsonOptions)
+      * jsonOptions : 
+        * showBackdrop
+        * enableBackdropDismiss
+        * cssClass
+    * present() 
+    * onDidDismiss(data => {})
+  * 备注:
+    * 不要再 app.module.ts 中再声明服务提供者
+    * 隐退弹出页面写逻辑写在弹出页面中,ViewController 实例的dismiss方法来隐退弹出页面
+
+ ## Navigation
+  * 功能描述: 导航,由 ion-nav 组件创建
+  * 可以再任意页面使用 NavController 实例 push 或 pop 页面
+  * 再 ion-nav 页面 无法直接使用 NavController ,可以再ion-nav 组件上设置模板变量,然后使用@ViewChild 来获取NavController 实例.
+  * 如果push的页面中含有 ion-navbar 组件,则ionic 回自动添加一个回退按钮
+
+## Popover
+  * 功能描述: 浮动弹出框,内容没有限制,一般用于详情,设置选项
+  * 依赖服务: PopoverController
+    * 不需要显示声明服务提供者
+    * 实例方法: create(PopOverPage,jsonData,jsonOptions)
+    * present(ev:UIEvent) ,如果不传递事件,则默认情况下显示在中间位置,传递事件一般有格好的显示效果
+    * dismiss() ,隐退,可也可以调用 ViewController 的 dismiss() 方法来隐退
+  * 举例
+    ```
+    <ion-header>
+      <ion-navbar>
+        <ion-title>标题</ion-title>
+        <ion-buttons end>
+          <ion-button ion-button icon-only (click)="presentPopover($event)">
+            <ion-icon name="more"></ion-icon>
+          </ion-button>
+        </ion-buttons>
+      </ion-navbar>
+    </ion-header>
+    ==========
+    presentPopover(ev: UIEvent){
+      const popover = this.popoverCtrl.create(PopoverPage);
+      popover.present({
+        ev: ev
+      });
+    }
+    ```  
+
+## Radio
+  * 功能描述 : 单选按钮组件
+  * 组件: ion-radio 
+  * 相关属性: color,checked,value,disabled
+  * 相关指令: radio-group 功能扩展指令
+    * 扩展指令属性: disabled
+  * 使用:  
+    ```
+    <ion-list radio-group [(ngModel)]="language">
+        <ion-list-header>
+          Language
+        </ion-list-header>
+        <ion-item>
+          <ion-label>C++</ion-label>
+          <ion-radio value="c++"></ion-radio>
+        </ion-item>
+        <ion-item>
+          <ion-label>C</ion-label>
+          <ion-radio value="c"></ion-radio>
+        </ion-item>
+        <ion-item>
+          <ion-label>Go</ion-label>
+          <ion-radio checked="true" value="go"></ion-radio>
+        </ion-item>
+        <ion-item>
+          <ion-label>Python</ion-label>
+          <ion-radio disabled value="python"></ion-radio>
+        </ion-item>
+      </ion-list>    
+    ```
+## Range
+  * 功能描述:  类似屏幕亮度,音量设置范围条.
+  * 组件: ion-range
+    * 相关组件: ion-label,ion-icon,需要使用 rang-left,range-right 进行功能扩展
+  * 相关属性: 
+    * min ,number 范围的最小值
+    * max ,number范围的最大值
+    * step ,number调控时的步长
+    * snaps ,boolean 是否显示刻度,要与 step 一起使用
+    * pin ,boolean 移动调节时是否在上面显示数值
+    * dualKnobs ,boolean 是否使用双控制按钮,当设置为true时,其绑定的value值需要是一个有lower,和upper的对象.
+    * debounce ,number 触发 ionChange 事件 延迟的毫秒数
+  * 使用
+    ```
+    <ion-range></ion-range>
+    --------------
+    <ion-range min="0" max="100">
+      <ion-label range-left>0</ion-label>
+      <ion-label range-right>100</ion-label>
+    </ion-range>
+    ------------------
+    <ion-range step="10" snaps="true" [(ngModel)]="sunnyValue">
+      <ion-icon name="sunny" range-left></ion-icon>
+      <ion-icon name="sunny" range-right></ion-icon>
+    </ion-range>
+    ```
+
+## Searchbar
+  * 功能描述: 搜索框组件
+  * 组件: ion-searchbar
+  * 相关属性: 
+    * animated ,boolean 动画
+    * autocomplete, string  on / off
+    * autocorrect, string on / off
+    * cancelButtonText, string 
+    * debounce , number 延迟触发 ionInput 事件的时间 毫秒
+    * placeholder, string 
+    * spellcheck, string|boolean
+    * type ,string
+      * text,password,email,number,search,tel,url .默认 search
+    * showCancelButton ,boolean 是否显示取消按钮
+  * 可以通过双向绑定获取输入的内容
+  * 相关事件: 
+    * ionInput($event) : 输入事件,可以携带参数 $event, $event.target.value 就是输入的值
+    * ionCancel($event) : 取消事件
+    * ionClear
+  * 实例方法: 
+    * setFocus()
+    * positionPlaceholder()  
+  * 使用
+    ```
+    <ion-searchbar showCanelButton="true" (ionInput)="onInput($event)" (ionCancel)="onCancel($event)" [(ngModel)]="inputValue">
+    ```   
+
+## Segment
+  * 功能描述: 类似 tabs 的选项卡
+  * 组件: ion-segment, ion-segment-button
+    * ion-segment 
+      * 相关属性: color
+    * ion-segment-button 
+      * 相关属性: value,disabled
+      * 相关事件: ionSelect
+
+  * 数据双向绑定在 ion-segment 组件上
+    ```
+    <ion-header>
+      <ion-toolbar>
+        <ion-segment [(ngModel)]="icon" color="secondary" (ionChange)="onChange($event)">
+          <ion-segment-button value="camera">
+            <ion-icon name="camera"></ion-icon>
+          </ion-segment-button>
+          <ion-segment-button value="bookmark">
+            <ion-icon name="bookmark"></ion-icon>
+          </ion-segment-button>
+          <ion-segment-button value="sunny">
+            <ion-icon name="sunny"></ion-icon>
+          </ion-segment-button>
+        </ion-segment>
+      </ion-toolbar>
+    </ion-header>
+
+    <ion-content padding>
+      <ion-segment [(ngModel)]="word" (ionChange)="onChange()">
+        <ion-segment-button value="friends">
+          Friends
+        </ion-segment-button>
+        <ion-segment-button value="enemies">
+          Enemies
+        </ion-segment-button>
+      </ion-segment>
+
+      <hr>
+      <form [formGroup]="myForm">
+        <ion-segment formControlName="mapStyle" color="danger">
+          <ion-segment-button value="standard">
+            Standard
+          </ion-segment-button>
+          <ion-segment-button value="hybrid">
+            Hybrid
+          </ion-segment-button>
+          <ion-segment-button value="sat">
+            Satellite
+          </ion-segment-button>
+        </ion-segment>
+      </form>
+    </ion-content>    
+    ```  
+    
+
+## Select
+  * 功能描述: 选项列表组件
+  * 组件:  ion-select , ion-option
+  * 相关属性: 
+    * cancelText ,string 取消按钮显示的文字
+    * okText, string 确定按钮显示的文字
+    * interface ,string 弹出框样式, alert,action-sheet,popover
+    * multiple , boolean 是否可以多选
+    * placeholder , string 没有选择时显示的文字
+    * selectOptions , any 与interface 对应的设置
+    * selectedText ,string 选择后显示的文本替代 ion-option 的值对应的文本
+    * compareWith , Function , 当 ion-option 的value值为对象时
+  * 相关事件:
+    * ionChange
+    * ionCancel
+  * 使用: 
+    ```
+    <ion-item>
+      <ion-label>选项</ion-label>
+      <ion-select [(ngModel)]="selectedValue" (ionChange)="onChange()">
+        <ion-option value="1">选项1</ion-option>
+        <ion-option value="2">选项2</ion-option>
+        <ion-option value="3">选项3</ion-option>
+        <ion-option value="4">选项4</ion-option>
+      </ion-select>
+    </ion-item>
+    ```  
+
+## Slides
+  * 功能描述: 轮播(滑动幻灯片)组件
+  * 组件: ion-slides ion-slide
+  * ion-slides  主要属性
+    * autoplay ,boolean 是否自动滚动
+    * loop , boolean 是否循环滚动
+    * pager , boolean 是否显示控制点(分页)
+    * paginationType, string  分页样式 bullets, fraction, progress
+    * spaceBetween, number 两张轮播图之间的间隔
+    * speed , number 切换速度 毫秒
+    * 其他, 文档,源码 too much 
+  * slides 实例属性设置
+    * slides.freeMode , boolean 手动滚动的样式
+    * slides.autoplayDisableOnInteraction , boolean 自动轮播过程成手动干预后是否停止自动轮播
+    * slides.stopAutoplay() , 关闭自动轮播( 页面切换时需要关闭 )
+    * slides.startAutoplay() , 开启自动轮播 (页面重新切回时开启轮播)
+  * slides 相关事件
+    * ionSlideTap,ionSlideDoubleTap 单击,双击事件
+    * 其他事件 文档,源码, too much
+  * 使用
+    ```
+    <ion-slides #slides pager autoplay loop speed="3000"  spaceBetween="30">
+      <ion-slide>
+        <h2>Slide 1 </h2>
+      </ion-slide>
+      <ion-slide>
+        <h2>Slide 2 </h2>
+      </ion-slide>
+      <ion-slide>
+        <h2>Slide 3 </h2>
+      </ion-slide>
+    </ion-slides>
+    =====================
+    @ViewChild('slides') slides : Slides;
+
+
+    ngAfterViewInit() {
+      this.slides.freeMode = true;
+      // 在自动滚动过程中手动操作会中断,设置后禁止中断.
+      this.slides.autoplayDisableOnInteraction = false;
+    }
+  
+    ionViewWillEnter() { 
+      this.slides.startAutoplay(); 
+    }
+    ionViewWillLeave() { 
+      this.slides.stopAutoplay(); 
+    }
+    ionViewDidEnter() {
+
+    }
+    ```
+## Tabs
+  * 功能描述: 标签导航组件
+  * 组件: ion-tabs , ion-tab
+  * ion-tabs相关属性: 
+    * selectedIndex , number 设置处于激活状态的标签,默认是0第一个.
+    * tabsPlacement , string 标签导航所在位置, bottom / top
+    * tabsLayout , string 标签显示样式, icon-top, icon-start, icon-end, icon-bottom, icon-hide, title-hide
+    * ion-tab 相关属性
+      * root , string 每一个 ion-tab 组件必须绑定root属性指定关联的页面
+      * enabled , boolean 是否可用
+      * rootParams , object 传递的参数
+      * show , boolean
+      * tabBadge , string 徽章
+      * tabBadgeStyle , string 徽章样式
+      * tabIcon , string 图标
+      * tabTitle , string 标题
+      * tabUrlPath , string 
+      * tabsHideOnSubPages , boolean  子页面中隐藏导航标签
+    * 使用
+    ```
+    <ion-tabs>
+      <ion-tab tabIcon="flame" tabTitle="热搜热点" tabBadge="10" tabBadgeStyle="danger" [root]="HomePage"></ion-tab>
+      <ion-tab tabIcon="jet" tabTitle="精选资讯" [root]="AboutPage"></ion-tab>
+      <ion-tab tabIcon="medal" tabTitle="精品商城" [root]="AboutPage"></ion-tab>
+      <ion-tab tabIcon="american-football" tabsHideOnSubPages="true" tabTitle="关于" [root]="ContactPage"></ion-tab>
+    </ion-tabs>    
+    ```
+
+## Toast 
+  * 功能描述: 弹出式的短消息
+  * 相关服务: ToastController
+  * 使用: 
+    ```
+    let toast = this.toastCtrl.create({
+      message: '消息内容',
+      duration: 3000,//持续显示的时间
+      position: 'top',// 位置 top middle bottom
+      cssClass: 'aaa',
+      showCloseButton: true,
+      closeButtonText: '关闭',
+      dismissOnPageChange: true
+    });
+
+    toast.onDidDismiss(() = >{
+      console.log('Toast 隐退事件');
+    });
+    toast.present();
+    toast.dismiss();
+
+    ```
+## Toggle
+  * 功能描述: 开关选项组件
+  * 组件: ion-toggle
+  * 相关属性: 
+    * disabled 
+    * checked
+    * color
+  * 使用: 
+    ```
+    <ion-item>
+      <ion-label>接收通知</ion-label>
+      <ion-toggle checked color="danger"></ion-toggle>
+    </ion-item>
+    <ion-item>
+      <ion-label>接收通知</ion-label>
+      <ion-toggle disabled checked color="dark"></ion-toggle>
+    </ion-item>
+    <ion-item>
+      <ion-label>接收通知</ion-label>
+      <ion-toggle [(ngModel)]="toggleValue3"></ion-toggle>
+    </ion-item>    
+    ```  
+## Toolbar
+  * 功能描述: 工具条,可以嵌套其他组件
+  * 组件:  ion-toolbar
+  * 相关属性: color
+    * 嵌套组件:
+      * ion-buttons ,其属性 end,start,left,right 可以控制显示的位置
+      * ion-title
+      * ion-slides
+      * ion-segment
+      * ion-searchbar
+      * .....
+    * ion-toolbar 一般放在 ion-header 或 ion-footer 内  
+    * 使用
+    ```
+    <ion-toolbar color="danger">
+        <ion-buttons start>
+          <button ion-button icon-only>
+            <ion-icon name="menu"></ion-icon>
+          </button>
+        </ion-buttons>
+        <ion-title>
+          Toolbar
+        </ion-title>
+        <ion-buttons end>
+          <button ion-button icon-only>
+            <ion-icon name="search"></ion-icon>
+          </button>
+        </ion-buttons>
+      </ion-toolbar>
+      <ion-toolbar color="secondary">
+        <ion-buttons start>
+          <button ion-button icon-only>
+            <ion-icon name="menu"></ion-icon>
+          </button>
+        </ion-buttons>
+        <ion-title>
+          Toolbar
+        </ion-title>
+        <ion-buttons end>
+          <button ion-button icon-only>
+            <ion-icon name="search"></ion-icon>
+          </button>
+        </ion-buttons>
+      </ion-toolbar>
+      <ion-toolbar color="dark">
+        <ion-buttons start>
+          <button ion-button icon-only>
+            <ion-icon name="menu"></ion-icon>
+          </button>
+        </ion-buttons>
+        <ion-title>
+          Toolbar
+        </ion-title>
+        <ion-buttons end>
+          <button ion-button icon-only>
+            <ion-icon name="search"></ion-icon>
+          </button>
+        </ion-buttons>
+      </ion-toolbar>
+      <ion-toolbar>
+        <ion-buttons start>
+          <button ion-button icon-only>
+            <ion-icon name="menu"></ion-icon>
+          </button>
+        </ion-buttons>
+        <ion-title>
+          Toolbar
+        </ion-title>
+        <ion-buttons end>
+          <button ion-button icon-only>
+            <ion-icon name="search"></ion-icon>
+          </button>
+        </ion-buttons>
+      </ion-toolbar>
+      <ion-toolbar color="primary">
+        <ion-buttons start>
+          <button ion-button icon-only>
+            <ion-icon name="menu"></ion-icon>
+          </button>
+        </ion-buttons>
+        <ion-title>
+          Toolbar
+        </ion-title>
+        <ion-buttons end>
+          <button ion-button icon-only>
+            <ion-icon name="search"></ion-icon>
+          </button>
+        </ion-buttons>
+      </ion-toolbar>
+      <ion-toolbar color="danger">
+        <ion-slides #slides parallax="true" slidesPerView="4" (ionSlideTap)="slideTaped($event)">
+          <ion-slide>Slide 1</ion-slide>
+          <ion-slide>Slide 2</ion-slide>
+          <ion-slide>Slide 3</ion-slide>
+          <ion-slide>Slide 4</ion-slide>
+          <ion-slide>Slide 5</ion-slide>
+          <ion-slide>Slide 6</ion-slide>
+          <ion-slide>Slide 7</ion-slide>
+          <ion-slide>Slide 8</ion-slide>
+          <ion-slide>Slide 9</ion-slide>
+          <ion-slide>Slide 10</ion-slide>
+        </ion-slides>
+        <ion-buttons end>
+          <button ion-button>
+            <ion-icon name="more"></ion-icon>
+          </button>
+        </ion-buttons>
+      </ion-toolbar>
+      <ion-toolbar style="background: red">
+        <ion-searchbar></ion-searchbar>
+        <ion-buttons end>
+          <button ion-button icon-only>
+            <ion-icon name="camera"></ion-icon>
+          </button>
+        </ion-buttons>
+      </ion-toolbar>
+      <ion-toolbar>
+        <ion-buttons start>
+          <button ion-button icon-only>
+            <ion-icon name="create"></ion-icon>
+          </button>
+        </ion-buttons>
+        <ion-segment>
+          <ion-segment-button value="new">New</ion-segment-button>
+          <ion-segment-button value="hot">Hot</ion-segment-button>
+        </ion-segment>
+        <ion-buttons end>
+          <button ion-button icon-only>
+            <ion-icon name="more"></ion-icon>
+          </button>
+        </ion-buttons>
+      </ion-toolbar>    
+    ``` 
+
+
+
+
+## Chip
+  * 功能描述: 简单标签组件
+  * 组件: ion-chip
+  * 通常与子标签 ion-label 组合使用
+  * 使用: 
+    ```
+      <ion-chip>
+        <ion-label>Default</ion-label>
+      </ion-chip>
+      <ion-chip>
+        <ion-label color="secondary">Secondary Label</ion-label>
+      </ion-chip>
+      <ion-chip color="secondary">
+        <ion-label color="dark">Secondary Chip Dark Label</ion-label>
+      </ion-chip>
+      <ion-chip color="danger">
+        <ion-label>Danger Chip</ion-label>
+      </ion-chip>
+      <ion-chip>
+        <ion-icon name="heart" color="dark"></ion-icon>
+        <ion-label>Defalut</ion-label>
+      </ion-chip>
+      <ion-chip>
+        <ion-avatar>
+          <img src="https://gravatar.com/avatar/dba6bae8c566f9d4041fb9cd9ada7741?d=identicon&f=y" alt="">
+        </ion-avatar>
+        <ion-label>Defalut</ion-label>
+      </ion-chip>    
+    ```
+
+## Config
+  * 功能描述: app 配置项
+  * 文档 for more
+
+## Content
+  * 功能描述: 内容组件,可以滚动的区域,一个页面应该只有一个此组件,如果需要其他的可滚动区域可以使用 ionScroll,此组件也可结合 Refresher 组件实现下拉刷新.
+  * 组件: ion-content
+  * 文档 for more
+
+## Events
+  * 功能描述: 事件发布
+  * 相关服务: Events
+  * 实例方法:
+    * events.publish(topic,eventData)
+    * events.subscribe(topic,handler)
+    * events.unsubscribe(topic,handler)
+
+## Footer
+  * 功能描述: 固定在底部的页角组件
+  * 组件: ion-footer
+  * 使用: 
+    ```
+    <ion-footer>
+      <ion-toolbar>
+        <ion-title>Footer</ion-title>
+      </ion-toolbar>
+    </ion-footer>
+    ```
+## Header
+  * 功能描述: 固定在顶部的页头组件
+  * 组件: ion-header
+  * 使用: 
+    ```
+    <ion-header>
+      <ion-navbar>
+        <ion-title>首页标题</ion-title>
+      </ion-navbar>
+    </ion-header>
+    -----------------
+    <ion-header>
+      <ion-toolbar>
+        <ion-buttons>
+          <button ion-button icon-only toggleMenu>
+            <ion-icon name="menu"></ion-icon>
+          </button>
+        </ion-buttons>
+        <ion-title>标题</ion-title>
+      </ion-toolbar>
+    </ion-header>
+    ```    
+
+## HideWhen
+  * 功能描述: 当符合条件时隐藏组件
+  * 类似属性: showWhen
+  * 使用: 
+    ```
+    <h2 hideWhen="ios">Hidden on iOS</h2>
+    <h2 hideWhen="android">Hidden on Android</h2>
+    -----------------------
+    <h2 showWhen="ios">Show on iOS</h2>
+    <h2 showWhen="android">Show on Android</h2>
+    ```
+## Img
+  * 功能描述: 图片组件,当一个页面图片较多时可以使用此组件,只加载可以看到的部分.
+  * 如果页面中图片不多可以直接使用html 的 img 标签.
+  * 相关属性:  
+    * src
+    * height
+    * width
+    * alt
+    * cache
+    * bounds
+
+## InfiniteScroll 
+  * 功能描述: 无限滚动组件,当页面滚动到底部时加载触发 ionInfinite 事件,可以捕获此事件并加载更多内容
+  * 组件: ion-infinite-scroll , ion-infinite-scroll-content
+  * ion-infinite-scroll 相关属性: 
+    * enabled , boolean
+    * position , string 位置 top / bottom
+    * threshold ,string 阀值 控制什么时候触发 ionInfinite 事件
+  * ion-infinite-scroll-content 相关属性
+    * loadingSpinner ,string 动画
+    * loadingText , string 文字
+  * ion-infinite-scroll-content  是默认的组件,也可以使用自定义组件
+  * 实例方法: 
+    * complete
+    * enable(shouldEnable: boolean)
+    * waitFor() ,接收一个返回 Promise的函数参数
+  * 使用: 
+    ```
+    <ion-infinite-scroll (ionInfinite)="doInfinite($event)">
+      <ion-infinite-scroll-content
+        loadingSpinner="bubbles"
+        loadingText="正在加载数据...">
+      </ion-infinite-scroll-content>
+    </ion-infinite-scroll>
+    --------------------------
+    <ion-infinite-scroll (ionInfinite)="$event.waitFor(doInfinite())">
+      <ion-infinite-scroll-content></ion-infinite-scroll-content>
+    </ion-infinite-scroll>
+
+    ```
 
 ## 组建 color 属性
   * color 属性用于指定组建的颜色样式
