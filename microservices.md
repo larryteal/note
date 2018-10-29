@@ -36,6 +36,8 @@
   * Event Sourcing （事件采购），需要高可用性
   * CQRS
   
+## 事务补偿
+  * TCC  
 
 
 
