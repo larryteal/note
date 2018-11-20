@@ -1,5 +1,20 @@
 # mongoDB 使用 v3.6.4
 
+## 链接登陆数据库
+  * 确保mongod 服务启动
+  * mongo 命令链接
+  * 权限认证
+  ```bash
+  systemctl status mongod
+  systemctl restart mongod
+
+  mongo
+  >use admin
+  >db.auth('root', '123456')
+  >show dbs
+
+  ```
+
 ## 添加管理员
 ```mongo
   use admin
@@ -9,6 +24,7 @@
     roles:[{ role:'权限',db:'admin' }]
   })
 ```
+* https://docs.mongodb.com/manual/core/security-built-in-roles/
 * 先添加管理员。然后再添加其他库的用户。
 ```mongo
   use testDB
@@ -41,6 +57,22 @@ sudo systemctl stop mongod
 ```bash
 sudo cp -ra /var/lib/mongo   /data/mongo
 ```
+## 卸载mongodb
+  * 卸载相关包
+  ```bash
+  sudo yum erase $(rpm -qa | grep mongodb-org)
+  ```
+  * 删除数据文件及日志文件
+  ```bash
+  sudo rm -r /var/log/mongodb
+  sudo rm -r /var/lib/mongo
+  ```
+## 数据库备份&导入
+### 备份导出数据库
+  * mongodump -h 127.0.0.1 --port 27017 -u uname -p upwd -d DBName
+### 导入数据库
+  * mongorestore -h IP --port 端口 -u 用户名 -p 密码 -d 数据库 --drop 文件存在路径
+
 ## 阅读笔记
 （来自菜鸟教程）
 ### 数据库也通过名字来标识。数据库名可以是满足以下条件的任意UTF-8字符串。
