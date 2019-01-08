@@ -1,9 +1,12 @@
 # vscode使用
 ## 插件
 * Atom 快捷键
-  Atom Keymap
+  * Atom Keymap
 * 路径自动补全
-  Path Intellisense
+  * Path Intellisense
+* 修改html标签，自动完成尾部闭合标签的同步修改
+  * Auto Rename Tag  
+* region folding for VS Code 创建折叠代码块   
 ## markdown 预览
   ctrl + shift + v
 ## VSCode使用ESLint检查Vue代码
@@ -55,3 +58,9 @@
 		"description": "init vue page"
 	}
   ```
+  <!-- TODO -->
+## 代码折叠 fold
+  * ctrl + k  然后 ctrl + [ 
+  * ctrl + k  然后 ctrl + ] 
+  * ctrl + k  然后 ctrl + 0 ~ 9
+  * ctrl + k  然后 ctrl + /
