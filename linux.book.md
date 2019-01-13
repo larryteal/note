@@ -91,6 +91,10 @@
   * 若日志轮询可以使用 -F
 ## less
 - 分页查看文件，可以使用搜索
+- 使用 less files
+  ```
+  less test.txt
+  ```
   * 空格键向下翻页
   * b键向前翻页
   * shift + > 文件末尾、shift + < 文件开头
@@ -103,6 +107,8 @@
   * 上下键可以上下单行滚动内容  
   * 左右键可以左右滚动内容
   * page up 、page down 键也可以上下翻页
+- 其他
+  * q退出  
 ## more
 - 用 less 替代， less is more
 ## ls
