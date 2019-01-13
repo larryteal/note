@@ -45,3 +45,19 @@
   git tag -d <Tag 名字>
   git push origin :refs/tags/<Tag 名字>
   ```
+## git 分支
+  * git init 初始化
+  * git remote -v 查看远程仓库地址
+  * git push origin master  初次提交会创建 master 分支
+  * git checkout -b dev 在创建分支上创建dev分支
+  * git push origin dev 把本地dev分支推送到远端
+  * git branch -a 列出所有的分支信息
+  * git checkout master 切换到主分支
+  * git merge dev 在当前分支合并dev分支（有冲突本地解决冲突后， git add 、 commit 、 push）
+  * git branch -D dev 删除本地dev分支
+  * git push origin :dev 删除远端dev分支
+  * git reset --hard head^ 回退到上一次commit ^ 的个数表示回退几个
+  * git log 查看日志
+  * git reflog 查看日志
+  * git reset --hard 788fsf 回退到指定状态 788fsf 是 git reflog 中查看到的记录标识
+
