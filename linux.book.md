@@ -203,4 +203,69 @@
 ## tree
 ## vi / vim
 ## make
+## find
+## echo
+## cp
+## which
+## xargs
+## rm
+- rm 结合 find 删除
+## mv
+## cut
+## alias
+## unalias
+## awk
+## sed
+## df
+## hostname
+## kill
+## mount / umount
+## ps
+## su
+## sh
+## uname
+## whoami
 
+
+# Linux 基础知识
+## 文件、目录、设备、磁盘
+- Linux 中文件是广义的，一切皆文件。
+- 设备也是文件，设备默认显示在 /dev目录下
+- 设备只有挂载后才能访问，不挂载就没有访问设备的入口，访问的入口被称为挂载点，挂载点实质就是目录
+- 磁盘也是设备，也需要挂载，系统默认会挂载一些设备包括磁盘。新接入的磁盘需要手动挂载。
+- 目录和磁盘以及磁盘分区是没有关联的，是分离的，目录和磁盘分区的关联是通过挂载关联的，而这种关联是可以改变的。
+- 默认目录是根据一定的类别组织创建的，也有历史原因（/放系统程序,/usr，用户程序，/ 和 /usr 下有一部分内容结构是一样的，最早只有一块磁盘挂载点是/ ,后来又加了一块盘挂载点 /usr, 后来又加了一块盘挂载点是 /home 放用数据）。
+  * /opt 存放第三方开发的程序，可以选装的程序，意为 option
+  * /usr/local 存放用户自己安装的程序
+  * / 存放系统相关程序
+  * /usr 存放系统厂商开发的程序
+  * /home 存放用户数据
+- FHS Linux目录层次规范
+- 第一等级标准
+  * /bin 必要的命令程序，常用命令 ls cat rm cp mkdir echo
+  * /boot 系统启动引导相关的程序文件，或系统内核相关
+  * /dev 设备文件 （磁盘，光驱，声卡，网卡）
+  * /etc 系统配置文件（yum，rpm安装的软件配置文件的默认路径）
+    - fatab 开机自动挂载磁盘,设备
+    - hosts 主机名接解析
+    - inittab 开机需要加载，运行级别
+    - issue 登陆之前的信息
+    - ld.so.conf
+    - motd 登陆之后的信息
+    - networks
+    - passwd
+    - profile 全局环境变量
+    - resolv.conf dns 客户端文件
+    - service
+    - syslog.conf
+    - init.d 服务启动命令 sshd iptables
+  * /lib 必要的共享库和系统模块
+  * /mnt 临时挂载点
+  * /opt 附加应用程序包
+  * /sbin 必要的系统程序
+  * /tmp 临时文件
+  * /usr 参看第二等级标准
+  * /var 可变数据
+- /home 普通用户名家目录
+- /root 超级管理员家目录
+- Linux系统启动过程
