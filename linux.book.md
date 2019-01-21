@@ -171,6 +171,12 @@
   ```
   stat test.txt
   ```
+  * 一次创建多个文件
+  ```
+  touch test{1..10}.txt
+  touch test{a..z}.txt
+  touch test{a..z}{1..5}.txt
+  ```
 ## mkdir
 - 创建目录
 - 参数 -m -p
@@ -212,8 +218,15 @@
 - rm 结合 find 删除
 ## mv
 ## cut
-## alias
-## unalias
+## alias / unalias
+- 其他
+  * 系统中有些命令默认是使用alias别名的（ls, rm 等）,可以在命令前加\来指定不使用别名，或者写命令的全路径，写脚本可以使用全路径
+  ```
+  \ls
+  /bin/ls
+  \rm test.txt
+  ```
+  * 可以使用which查看命令所在的路径
 ## awk
 ## sed
 ## df
@@ -225,6 +238,7 @@
 ## sh
 ## uname
 ## whoami
+## wget
 
 
 # Linux 基础知识
@@ -268,4 +282,6 @@
   * /var 可变数据
 - /home 普通用户名家目录
 - /root 超级管理员家目录
-- Linux系统启动过程
+- Linux 系统启动过程
+## 字符集设置
+- LANG 环境变量

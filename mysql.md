@@ -34,5 +34,16 @@
   ```bash
    ALTER USER 'root'@'localhost' IDENTIFIED BY 'MyNewPass4!';
   ```
-  
+# 添加新用户
+  ```
+  mysql> CREATE USER 'finley'@'localhost' IDENTIFIED BY 'password';
+  mysql> GRANT ALL PRIVILEGES ON *.* TO 'finley'@'localhost'
+      ->     WITH GRANT OPTION;
+  mysql> CREATE USER 'finley'@'%' IDENTIFIED BY 'password';
+  mysql> GRANT ALL PRIVILEGES ON *.* TO 'finley'@'%'
+      ->     WITH GRANT OPTION;
+  mysql> CREATE USER 'admin'@'localhost' IDENTIFIED BY 'password';
+  mysql> GRANT RELOAD,PROCESS ON *.* TO 'admin'@'localhost';
+  mysql> CREATE USER 'dummy'@'localhost';
+  ```  
   
