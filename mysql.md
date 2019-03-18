@@ -46,4 +46,17 @@
   mysql> GRANT RELOAD,PROCESS ON *.* TO 'admin'@'localhost';
   mysql> CREATE USER 'dummy'@'localhost';
   ```  
-  
+# 数据导入导出
+  ```
+  mysqldump --host rm-bp1q8ebcv890a2n20wo.mysql.rds.aliyuncs.com -u sulaibao_pay -p  --set-gtid-purged=OFF sulaibao_pay > sulaibao_pay.sql
+  mysql> source ./sulaibao_pay.sql
+  ```
+## 设置自动增长字段值
+  * 查看自动增长字段值
+  ```
+  select auto_increment from information_schema.tables where table_schema='db name' and table_name='table name';
+  ```
+  * 修改自动增长数值
+  ```
+  alter table `tablename` auto_increment=NUMBER;
+  ```
