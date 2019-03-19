@@ -208,7 +208,7 @@
   * 停止服务
   ```
   docker stack rm stackName
-  docker swarm level --force
+  docker swarm leave --force
   ```
   * 命令
   ```
