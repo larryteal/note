@@ -382,3 +382,21 @@ db.articles.aggregate( [
 ```bash
 mongoimport --db test --collection imp --drop --file /home/Larry/下载/dataset.json  --username test --password 123456
 ```
+## 其他
+### 数据操作
+  * 聚合
+  ```
+  let contractAggs = await Contract.aggregate([
+    { $match: conditionContract },
+    { $project: { yearMonth: { $substr: [dateTQ, 0, -1] }, branchOne: 1, branchTwo: 1, branch: 1, agentCode: 1, agentTelephone: 1, agentName: 1, commissionPrem: 1, totalModalPrem: 1 } },
+    { $group: { _id: '$agentCode', yearMonth: { $first: '$yearMonth' }, branchOne: { $first: '$branchOne' }, branchTwo: { $first: '$branchTwo' }, branchCode: { $first: '$branch' }, agentCode: { $first: '$agentCode' }, contractMobile: { $first: '$agentTelephone' }, agentName: { $first: '$agentName' }, fyc: { $sum: '$commissionPrem' }, totalPremium: { $sum: '$totalModalPrem' } } }
+  ])
+  ```
+  * 去重筛选
+  ```
+  db.getCollection('basic_law').aggregate([
+    { $match: { yearMonth:/2018/, branchCode: { $in: ['SLBX130401','SLBX010101'] } } },
+    { $project: { branchCode:1,yearMonth:1 } },
+    { $group: { _id: { branchCode: '$branchCode', yearMonth: '$yearMonth' }, branchCode: { $first: '$branchCode' }, yearMonth: { $first: '$yearMonth' } }}
+  ])
+  ```

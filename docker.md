@@ -223,10 +223,85 @@
   ```
 ### 第四部分
   * swarm 集群
-  * 安装 VirtualBox （被 docker-machine 依赖）
-  * 安装 docker-machine (用于创建虚拟机)
+  * 练习环境搭建 
+    * 安装 VirtualBox （被 docker-machine 依赖）
+    * 安装 docker-machine (用于创建虚拟机)
+    ```
+    base=https://github.com/docker/machine/releases/download/v0.16.0 &&
+    curl -L $base/docker-machine-$(uname -s)-$(uname -m) >/tmp/docker-machine &&
+    sudo install /tmp/docker-machine /usr/local/bin/docker-machine
+    ```
+  * 开启 swarm
   ```
-  base=https://github.com/docker/machine/releases/download/v0.16.0 &&
-  curl -L $base/docker-machine-$(uname -s)-$(uname -m) >/tmp/docker-machine &&
-  sudo install /tmp/docker-machine /usr/local/bin/docker-machine
-  ```  
+  sudo docker swarm init --advertise-addr <ip>
+  ```
+  * 查看加入 worker 命令
+  ```
+  docker swarm join-token worker
+  ```
+  * 查看加入 mannger 命令
+  ```
+  docker swarm join-token manager
+  ```
+  * 查看节点
+  ```
+  docker node ls
+  ```
+  * 在集群上部署应用
+  ```
+  docker stack deploy -c docker-compose.yml getstartedlab
+  # 如果使用的镜像是私有的，需要登陆并授权worker
+  docker login
+  docker stack deploy --with-registry-auth -c docker-compose.yml getstartedlab
+  ```
+  * 节点离开集群
+  ```
+  docker swarm leave
+  docker swarm leave --force # -f, --force 强制离开，无视警告
+  ```
+### 第五部分
+  * stack 部署多个服务，指定特定服务运行位置，目录映射
+  ```
+  version: "3"
+  services:
+    web:
+      # replace username/repo:tag with your name and image details
+      image: username/repo:tag
+      deploy:
+        replicas: 5
+        restart_policy:
+          condition: on-failure
+        resources:
+          limits:
+            cpus: "0.1"
+            memory: 50M
+      ports:
+        - "80:80"
+      networks:
+        - webnet
+    visualizer:
+      image: dockersamples/visualizer:stable
+      ports:
+        - "8080:8080"
+      volumes:
+        - "/var/run/docker.sock:/var/run/docker.sock"
+      deploy:
+        placement:
+          constraints: [node.role == manager]
+      networks:
+        - webnet
+    redis:
+      image: redis
+      ports:
+        - "6379:6379"
+      volumes:
+        - "/home/docker/data:/data"
+      deploy:
+        placement:
+          constraints: [node.role == manager]
+      command: redis-server --appendonly yes
+      networks:
+        - webnet
+  networks:
+    webnet:
+  ```

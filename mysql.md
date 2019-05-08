@@ -55,8 +55,11 @@
   * 查看自动增长字段值
   ```
   select auto_increment from information_schema.tables where table_schema='db name' and table_name='table name';
+  select auto_increment from information_schema.tables where table_schema='trbh_pay' and table_name='order'
   ```
   * 修改自动增长数值
   ```
   alter table `tablename` auto_increment=NUMBER;
+  alter table `order` auto_increment=800;
+  
   ```
