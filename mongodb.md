@@ -36,6 +36,7 @@
 ```
 ## 配置mongoDB认证
 * 修改/etc/mongod.conf,设置security.authorization 为 enabled
+* window 配置文件位置可以通过服务查看
 ```bash
 # security
 security:
