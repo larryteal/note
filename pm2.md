@@ -317,3 +317,9 @@
     }]
   }
   ```
+# error & kill
+  ![avatar](./images/PM2error.png)
+  ```
+  pm2 kill
+  pm2 start ecosystem.config.js
+  ```
